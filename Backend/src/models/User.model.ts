@@ -11,6 +11,8 @@ export interface IUser extends Document {
   profileImage?: string;
   createdAt: Date;
   updatedAt: Date;
+  resetPasswordToken?: string;
+resetPasswordExpires?: Date;
 }
 
 const userSchema = new Schema<IUser>(
@@ -31,7 +33,7 @@ const userSchema = new Schema<IUser>(
     },
     profileImage: { type: String, default: "" },
   },
-  { timestamps: true } // auto-creates createdAt & updatedAt
+  { timestamps: true } 
 );
 
 export const User = mongoose.model<IUser>("User", userSchema);

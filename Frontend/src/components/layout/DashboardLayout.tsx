@@ -1,19 +1,14 @@
 import type { ReactNode } from "react";
-import LogoutButton from "../common/LogoutButton";
-import { useAuth } from "../../hooks/useAuth";
+import NavBar from "./NavBar";
 
 const DashboardLayout = ({ children }: { children: ReactNode }) => {
-  const { user } = useAuth();
-
   return (
-    <div>
-      <header style={{ display: "flex", justifyContent: "space-between", padding: "16px", borderBottom: "1px solid #ddd" }}>
-        <span>Welcome, {user?.fullName} ({user?.role})</span>
-        <LogoutButton />
-      </header>
-      <main style={{ padding: "20px" }}>{children}</main>
+    <div className="min-h-screen bg-cream">
+      <NavBar />
+      <main className="max-w-7xl mx-auto px-6 py-8">{children}</main>
     </div>
   );
 };
 
 export default DashboardLayout;
+

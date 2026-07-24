@@ -1,9 +1,12 @@
+
+
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { isAxiosError } from "axios";
 import { loginUser } from "../../services/auth.service";
 import { useAuth } from "../../hooks/useAuth";
+import AuthLayout from "../../components/layout/AuthLayout";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -25,44 +28,77 @@ const Login = () => {
       else navigate("/client/dashboard");
     } catch (err: unknown) {
       if (isAxiosError(err)) {
-        toast.error(err.response?.data?.message || "Registration failed");
+        toast.error(err.response?.data?.message || "Login failed");
       } else {
-        toast.error("Registration failed");
+        toast.error("Login failed");
       }
     } finally {
       setLoading(false);
     }
   };
 
+  const inputClass =
+    "w-full bg-white border border-border rounded-md text-charcoal text-sm " +
+    "px-3 py-2.5 focus:outline-none focus:border-amber transition-colors " +
+    "placeholder:text-muted/70";
+
   return (
-    <div style={{ maxWidth: 400, margin: "60px auto" }}>
-      <h2>Login</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-         <p style={{ textAlign: "right", margin: "8px 0" }}>
-          <Link to="/forgot-password">Forgot password?</Link>
-        </p>
-        <button type="submit" disabled={loading}>
-          {loading ? "Logging in..." : "Login"}
+    <AuthLayout>
+      <p className="font-serif font-bold text-2xl text-charcoal mb-1">Welcome back</p>
+      <p className="text-sm text-muted mb-8">Sign in to continue to DesignFlow.</p>
+
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div>
+          <label className="block text-xs text-muted uppercase tracking-wide font-semibold mb-2">
+            Email
+          </label>
+          <input
+            type="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className={inputClass}
+          />
+        </div>
+
+        <div>
+          <div className="flex justify-between items-center mb-2">
+            <label className="block text-xs text-muted uppercase tracking-wide font-semibold">
+              Password
+            </label>
+            <Link to="/forgot-password" className="text-xs text-amber underline underline-offset-2">
+              Forgot?
+            </Link>
+          </div>
+          <input
+            type="password"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className={inputClass}
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-clay hover:bg-ember transition-colors text-cream
+                     text-xs uppercase tracking-wider font-semibold py-3 rounded-md
+                     disabled:opacity-60"
+        >
+          {loading ? "Signing in..." : "Sign in"}
         </button>
       </form>
-      <p>
-        Don't have an account? <Link to="/register">Register</Link>
+
+      <p className="text-sm text-muted mt-8">
+        Don't have an account?{" "}
+        <Link to="/register" className="text-amber underline underline-offset-2 font-medium">
+          Create one
+        </Link>
       </p>
-    </div>
+    </AuthLayout>
   );
 };
 
