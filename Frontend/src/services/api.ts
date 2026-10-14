@@ -2,7 +2,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 
 const api = axios.create({
-  baseURL: "https://design-flow.online/api",
+  baseURL: "https://api.design-flow.online/api",
   withCredentials: true,
 });
 
