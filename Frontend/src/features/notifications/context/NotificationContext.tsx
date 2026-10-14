@@ -45,7 +45,7 @@ export const NotificationProvider = ({
 
       try {
         const response = await fetch(
-          "http://localhost:5000/api/notifications/stream",
+          ""https://design-flow.online/api/notifications/stream",",
           {
             method: "GET",
             headers: {
