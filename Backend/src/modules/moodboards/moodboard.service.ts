@@ -178,8 +178,9 @@ export const createMoodBoardService =
 
     if (existingMoodBoard) {
       throw new ApiError(
-        400,
-        "Mood Board already exists for this project"
+        409,
+        "Mood Board already exists for this project",
+        "MOODBOARD_EXISTS"
       );
     }
 
@@ -520,6 +521,97 @@ export const getDesignerMoodBoardsService =
 
       {
         $lookup: {
+          from: "projectrequests",
+          localField: "sourceRequest",
+          foreignField: "_id",
+          as: "sourceRequestDoc",
+        },
+      },
+
+      {
+        $unwind: {
+          path: "$sourceRequestDoc",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      {
+        $lookup: {
+          from: "categories",
+          localField: "sourceRequestDoc.category",
+          foreignField: "_id",
+          as: "sourceCategory",
+        },
+      },
+
+      {
+        $unwind: {
+          path: "$sourceCategory",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      {
+        $lookup: {
+          from: "catalogitems",
+          localField: "sourceRequestDoc.catalogItem",
+          foreignField: "_id",
+          as: "sourceCatalogItem",
+        },
+      },
+
+      {
+        $unwind: {
+          path: "$sourceCatalogItem",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      {
+        $lookup: {
+          from: "quotations",
+          let: { projectId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    {
+                      $eq: [
+                        "$project",
+                        "$$projectId",
+                      ],
+                    },
+                    {
+                      $eq: [
+                        "$status",
+                        "client_accepted",
+                      ],
+                    },
+                  ],
+                },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+              },
+            },
+          ],
+          as: "acceptedQuotation",
+        },
+      },
+
+      {
+        $match: {
+          "acceptedQuotation.0": {
+            $exists: true,
+          },
+        },
+      },
+
+      {
+        $lookup: {
           from: "users",
           localField: "client",
           foreignField: "_id",
@@ -582,6 +674,14 @@ export const getDesignerMoodBoardsService =
               "client.email":
                 searchRegex,
             },
+            {
+              "sourceRequestDoc.projectName":
+                searchRegex,
+            },
+            {
+              "sourceCatalogItem.name":
+                searchRegex,
+            },
           ],
         },
       });
@@ -614,8 +714,56 @@ export const getDesignerMoodBoardsService =
                   status: "$status",
                   designerStatus:
                     "$designerStatus",
-                  sourceRequest:
-                    "$sourceRequest",
+                  sourceRequest: {
+                    _id: "$sourceRequestDoc._id",
+                    projectName:
+                      "$sourceRequestDoc.projectName",
+                    description:
+                      "$sourceRequestDoc.description",
+                    referenceImages:
+                      "$sourceRequestDoc.referenceImages",
+                    needBy:
+                      "$sourceRequestDoc.needBy",
+                    estimatedTotal:
+                      "$sourceRequestDoc.estimatedTotal",
+                    roomInfo:
+                      "$sourceRequestDoc.roomInfo",
+                    category: {
+                      $cond: [
+                        {
+                          $ifNull: [
+                            "$sourceCategory._id",
+                            false,
+                          ],
+                        },
+                        {
+                          _id: "$sourceCategory._id",
+                          name: "$sourceCategory.name",
+                          image:
+                            "$sourceCategory.image",
+                        },
+                        "$sourceRequestDoc.category",
+                      ],
+                    },
+                    catalogItem: {
+                      $cond: [
+                        {
+                          $ifNull: [
+                            "$sourceCatalogItem._id",
+                            false,
+                          ],
+                        },
+                        {
+                          _id: "$sourceCatalogItem._id",
+                          name:
+                            "$sourceCatalogItem.name",
+                          image:
+                            "$sourceCatalogItem.image",
+                        },
+                        "$sourceRequestDoc.catalogItem",
+                      ],
+                    },
+                  },
                 },
 
                 client: {

@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import { useMyProjectRequests } from "../../hooks/useClientProjectRequests";
 import { useMyProjects } from "../../../projects/hooks/useProjects";
 
+import SearchField from "../../../../shared/components/ui/SearchField";
+
 const LIMIT = 9;
 
 const statusStyles: Record<string, string> = {
@@ -107,26 +109,13 @@ const MyProjectRequestsPage = () => {
 
       {/* Filters */}
       <div className="flex flex-col gap-3 sm:flex-row">
-        <div className="relative flex-1">
-          <input
-            type="text"
+        <div className="flex-1">
+          <SearchField
             value={searchInput}
-            onChange={(event) =>
-              setSearchInput(event.target.value)
-            }
+            onChange={setSearchInput}
             placeholder="Search requests..."
-            className="w-full rounded-lg border border-border bg-white px-4 py-2.5 text-sm text-charcoal outline-none transition focus:border-clay focus:ring-1 focus:ring-clay"
+            ariaLabel="Search project requests"
           />
-
-          {searchInput && (
-            <button
-              type="button"
-              onClick={() => setSearchInput("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted hover:text-charcoal"
-            >
-              ×
-            </button>
-          )}
         </div>
 
         <select

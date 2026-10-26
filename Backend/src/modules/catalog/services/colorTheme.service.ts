@@ -22,7 +22,8 @@ export const createColorTheme = async (
   if (existingColorTheme) {
     throw new ApiError(
       409,
-      "Color theme already exists"
+      "Color theme already exists",
+      "COLOR_THEME_EXISTS"
     );
   }
 
@@ -98,7 +99,8 @@ export const updateColorTheme = async (
     if (existingColorTheme) {
       throw new ApiError(
         409,
-        "Color theme already exists"
+        "Color theme already exists",
+        "COLOR_THEME_EXISTS"
       );
     }
   }

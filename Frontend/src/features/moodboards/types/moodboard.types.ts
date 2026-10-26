@@ -33,16 +33,38 @@ export interface IMoodBoardVersion {
   updatedAt?: string;
 }
 
+export interface IMoodBoardCatalogReference {
+  _id: string;
+  name: string;
+  image?: string;
+}
+
+export interface IMoodBoardProjectSourceRequest {
+  _id: string;
+  projectName?: string;
+  description?: string;
+  referenceImages?: string[];
+  needBy?: string;
+  estimatedTotal?: number;
+  category?:
+    | string
+    | IMoodBoardCatalogReference;
+  catalogItem?:
+    | string
+    | IMoodBoardCatalogReference;
+  roomInfo?: {
+    roomType?: string;
+    customRoomType?: string;
+  };
+}
+
 export interface IMoodBoardProject {
   _id: string;
   status: string;
   designerStatus: string;
   sourceRequest?:
     | string
-    | {
-        _id: string;
-        projectName?: string;
-      };
+    | IMoodBoardProjectSourceRequest;
 }
 
 export interface IMoodBoardUser {

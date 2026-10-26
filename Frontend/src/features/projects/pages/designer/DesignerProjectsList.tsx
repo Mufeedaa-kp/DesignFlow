@@ -79,7 +79,7 @@ const STATUS_TABS: {
 const statusStyles: Record<string, string> = {
   planning: "bg-amber/15 text-amber",
   in_progress: "bg-clay/15 text-clay",
-  completed: "bg-emerald-500/15 text-emerald-600",
+  completed: "bg-olive/15 text-olive",
 };
 
 const StatusPill = ({

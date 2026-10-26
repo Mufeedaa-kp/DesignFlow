@@ -38,6 +38,33 @@ export const registerValidation = z.object({
     ),
 });
 
+export const resendOtpValidation = z.object({
+  email: z
+    .string()
+    .trim()
+    .email("Valid email is required"),
+});
+
+export const verifyOtpValidation = z.object({
+  email: z
+    .string()
+    .trim()
+    .email("Valid email is required"),
+
+  otp: z
+    .string()
+    .trim()
+    .regex(/^\d{6}$/, "Verification code must be 6 digits"),
+});
+
+export const googleAuthValidation = z.object({
+  credential: z
+    .string()
+    .trim()
+    .min(20, "Google credential is required")
+    .max(10000, "Google credential is too large"),
+});
+
 export const loginValidation = z.object({
   email: z
     .string()

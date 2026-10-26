@@ -18,11 +18,12 @@ interface NavBarProps {
   onMenuClick?: () => void;
 }
 
-const SEARCHABLE_PATH_SEGMENTS = [
-  "/projects",
-  "/users",
-  "/requests",
-];
+const SEARCHABLE_PATHS = new Set([
+  "/admin/projects",
+  "/admin/users",
+  "/designer/projects",
+  "/designer/clients",
+]);
 
 const NavBar = ({
   title,
@@ -37,11 +38,12 @@ const NavBar = ({
   const isQuotationPage =
     location.pathname.includes("/quotation");
 
+  const currentPath =
+    location.pathname.replace(/\/+$/, "") || "/";
+
   const showSearch =
     !isQuotationPage &&
-    SEARCHABLE_PATH_SEGMENTS.some((segment) =>
-      location.pathname.includes(segment)
-    );
+    SEARCHABLE_PATHS.has(currentPath);
 
   const handleHamburgerClick = () => {
     if (onMenuClick) {
@@ -113,6 +115,12 @@ const NavBar = ({
         </div>
       </div>
 
+      {showSearch && (
+        <div className="border-t border-border px-4 py-2.5 sm:hidden">
+          <SearchBar />
+        </div>
+      )}
+
       {/* Internal mobile dropdown */}
       {!onMenuClick &&
         links.length > 0 &&
@@ -136,12 +144,6 @@ const NavBar = ({
                 {link.label}
               </RouterNavLink>
             ))}
-
-            {showSearch && (
-              <div className="sm:hidden pt-2">
-                <SearchBar />
-              </div>
-            )}
           </nav>
         )}
     </header>

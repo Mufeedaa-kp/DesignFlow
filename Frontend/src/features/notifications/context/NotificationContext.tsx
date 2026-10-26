@@ -7,12 +7,87 @@ import {
 
 import { useQueryClient } from "@tanstack/react-query";
 
+import api, { API_BASE_URL } from "../../../services/api";
+import { useAppSelector } from "../../../store/hooks";
+
 import {
   NotificationContext,
   type Notification,
 } from "./notificationContextValue";
 
 import { notificationKeys } from "../hooks/useNotifications";
+
+const openNotificationStream = (
+  token: string,
+  signal: AbortSignal
+) =>
+  fetch(`${API_BASE_URL}/notifications/stream`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "text/event-stream",
+    },
+    credentials: "include",
+    signal,
+  });
+
+const isAccessTokenExpired = (
+  token: string
+) => {
+  try {
+    const payload = token.split(".")[1];
+
+    if (!payload) {
+      return true;
+    }
+
+    const normalized = payload
+      .replace(/-/g, "+")
+      .replace(/_/g, "/");
+
+    const padded = normalized.padEnd(
+      Math.ceil(normalized.length / 4) * 4,
+      "="
+    );
+
+    const decoded = JSON.parse(atob(padded)) as {
+      exp?: number;
+    };
+
+    return (
+      typeof decoded.exp !== "number" ||
+      decoded.exp * 1000 <= Date.now() + 5000
+    );
+  } catch {
+    return true;
+  }
+};
+
+const refreshAccessToken = async (
+  signal: AbortSignal
+) => {
+  const response = await api.post(
+    "/auth/refresh",
+    undefined,
+    { signal }
+  );
+
+  const token =
+    response.data?.data?.accessToken;
+
+  if (typeof token !== "string" || !token) {
+    throw new Error(
+      "Refresh response did not include an access token"
+    );
+  }
+
+  localStorage.setItem(
+    "designflow_token",
+    token
+  );
+
+  return token;
+};
 
 interface NotificationProviderProps {
   children: ReactNode;
@@ -29,11 +104,16 @@ export const NotificationProvider = ({
 
   const queryClient = useQueryClient();
 
+  const authToken = useAppSelector(
+    (state) => state.auth.token
+  );
+
   useEffect(() => {
     const connectSSE = async () => {
-      const token = localStorage.getItem(
-        "designflow_token"
-      );
+      let token =
+        localStorage.getItem(
+          "designflow_token"
+        ) ?? authToken;
 
       if (!token) {
         return;
@@ -44,20 +124,68 @@ export const NotificationProvider = ({
       abortControllerRef.current = controller;
 
       try {
-        const response = await fetch(
-          "http://localhost:5000/api/notifications/stream",
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              Accept: "text/event-stream",
-            },
-            credentials: "include",
-            signal: controller.signal,
+        if (isAccessTokenExpired(token)) {
+          try {
+            token = await refreshAccessToken(
+              controller.signal
+            );
+          } catch {
+            if (!controller.signal.aborted) {
+              console.warn(
+                "Notification stream paused: session refresh failed."
+              );
+            }
+
+            return;
           }
+        }
+
+        if (controller.signal.aborted) {
+          return;
+        }
+
+        let response = await openNotificationStream(
+          token,
+          controller.signal
         );
 
+        if (response.status === 401) {
+          let refreshedToken: string;
+
+          try {
+            refreshedToken =
+              await refreshAccessToken(
+                controller.signal
+              );
+          } catch {
+            if (!controller.signal.aborted) {
+              console.warn(
+                "Notification stream paused: session refresh failed."
+              );
+            }
+
+            return;
+          }
+
+          if (controller.signal.aborted) {
+            return;
+          }
+
+          response = await openNotificationStream(
+            refreshedToken,
+            controller.signal
+          );
+        }
+
         if (!response.ok) {
+          if (response.status === 401) {
+            console.warn(
+              "Notification stream paused: sign in again to receive live updates."
+            );
+
+            return;
+          }
+
           throw new Error(
             `SSE connection failed: ${response.status}`
           );
@@ -165,7 +293,7 @@ queryClient.invalidateQueries({
       abortControllerRef.current?.abort();
       abortControllerRef.current = null;
     };
-  }, [queryClient]);
+  }, [authToken, queryClient]);
 
   const clearLatestNotification = () => {
     setLatestNotification(null);

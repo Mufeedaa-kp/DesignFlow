@@ -14,6 +14,8 @@ const envSchema = z.object({
   CLIENT_URL: z.string().url().default("http://localhost:5173"),
   RESEND_API_KEY: z.string().min(1, "RESEND_API_KEY is required"),
   RESEND_FROM_EMAIL: z.string().email().default("onboarding@resend.dev"), 
+  OTP_SECRET: z.string().min(32, "OTP_SECRET must be at least 32 chars"),
+  GOOGLE_CLIENT_ID: z.string().min(1).optional(),
 })
 
 const parsed = envSchema.safeParse(process.env); 

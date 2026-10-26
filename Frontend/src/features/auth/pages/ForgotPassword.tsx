@@ -1,29 +1,42 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import toast from "react-hot-toast";
-import { isAxiosError } from "axios";
+import { z } from "zod";
 import api from "../../../services/api";
 import AuthLayout from "../layouts/AuthLayout";
+import { getErrorMessage } from "../../../shared/utils/errors";
+
+const emailSchema = z
+  .string()
+  .trim()
+  .min(1, "Email is required")
+  .email("Valid email is required");
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [submitError, setSubmitError] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setEmailError("");
+    setSubmitError("");
+
+    const result = emailSchema.safeParse(email);
+
+    if (!result.success) {
+      setEmailError(result.error.issues[0].message);
+      return;
+    }
+
     setLoading(true);
     try {
-      await api.post("/auth/forgot-password", { email });
+      await api.post("/auth/forgot-password", { email: result.data });
       setSent(true);
-      toast.success("Reset link sent");
     } catch (err: unknown) {
-      if (isAxiosError(err)) {
-        toast.error(err.response?.data?.message || "Something went wrong");
-      } else {
-        toast.error("Something went wrong");
-      }
+      setSubmitError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -50,13 +63,29 @@ const ForgotPassword = () => {
               type="email"
               placeholder="you@example.com"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setEmailError("");
+                setSubmitError("");
+              }}
               required
+              aria-invalid={Boolean(emailError)}
               className="w-full bg-white border border-border rounded-md text-charcoal text-sm
                          px-3 py-2.5 focus:outline-none focus:border-amber transition-colors
                          placeholder:text-muted/70"
             />
+            {emailError && (
+              <p role="alert" className="text-xs text-ember mt-1">
+                {emailError}
+              </p>
+            )}
           </div>
+
+          {submitError && (
+            <p role="alert" className="text-xs text-ember">
+              {submitError}
+            </p>
+          )}
 
           <button
             type="submit"

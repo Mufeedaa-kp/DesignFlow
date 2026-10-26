@@ -153,7 +153,7 @@ const PendingAssignments = () => {
       )}
 
       {!isLoading && pending.length === 0 && (
-        <div className="bg-white rounded-xl border border-border p-8 shadow-sm text-center">
+        <div className="bg-surface rounded-xl border border-border p-8 shadow-sm text-center">
           <p className="text-sm text-muted">
             No pending assignments right now.
           </p>
@@ -184,7 +184,7 @@ const PendingAssignments = () => {
             return (
               <div
                 key={project._id}
-                className="bg-white rounded-xl border border-border p-5 shadow-sm"
+                className="bg-surface rounded-xl border border-border p-5 shadow-sm"
               >
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                   <div className="flex-1">
@@ -358,7 +358,7 @@ const PendingAssignments = () => {
                       disabled={
                         acceptMutation.isPending
                       }
-                      className="flex-1 sm:flex-none flex items-center justify-center gap-1 text-xs font-semibold px-3 py-2 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 disabled:opacity-50"
+                      className="flex-1 sm:flex-none flex items-center justify-center gap-1 text-xs font-semibold px-3 py-2 rounded-lg bg-olive/10 text-olive hover:bg-olive/20 disabled:opacity-50"
                     >
                       <FiCheck size={14} /> Accept
                     </button>
@@ -370,7 +370,7 @@ const PendingAssignments = () => {
                       disabled={
                         rejectMutation.isPending
                       }
-                      className="flex-1 sm:flex-none flex items-center justify-center gap-1 text-xs font-semibold px-3 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 disabled:opacity-50"
+                      className="flex-1 sm:flex-none flex items-center justify-center gap-1 text-xs font-semibold px-3 py-2 rounded-lg bg-ember/10 text-ember hover:bg-ember/20 disabled:opacity-50"
                     >
                       <FiX size={14} /> Reject
                     </button>
@@ -383,8 +383,8 @@ const PendingAssignments = () => {
       )}
 
       {rejectingId && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-lg">
+        <div className="fixed inset-0 bg-charcoal/50 flex items-center justify-center z-50">
+          <div className="bg-surface rounded-xl p-6 w-full max-w-md shadow-lg">
             <h3 className="font-serif font-bold text-lg text-charcoal mb-3">
               Reject assignment
             </h3>
@@ -395,7 +395,7 @@ const PendingAssignments = () => {
                 setReason(e.target.value)
               }
               placeholder="Reason for rejecting this assignment..."
-              className="w-full border border-border rounded-lg p-3 text-sm mb-4 min-h-25"
+              className="mb-4 min-h-25 w-full rounded-lg border border-border bg-surface p-3 text-sm text-charcoal outline-none focus:border-amber"
               autoFocus
             />
 
@@ -413,7 +413,7 @@ const PendingAssignments = () => {
                   !reason.trim() ||
                   rejectMutation.isPending
                 }
-                className="text-xs font-semibold px-3 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
+                className="text-xs font-semibold px-3 py-2 rounded-lg bg-ember text-cream hover:bg-charcoal disabled:opacity-50"
               >
                 Submit rejection
               </button>

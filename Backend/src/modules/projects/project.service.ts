@@ -108,16 +108,22 @@ export const getProjectById = async (
 
   const project = await Project.findById(id)
     .populate({
-  path: "sourceRequest",
-  populate: [
-    {
-      path: "catalogItem",
-    },
-    {
-      path: "category",
-    },
-  ],
-})
+      path: "sourceRequest",
+      populate: [
+        {
+          path: "catalogItem",
+        },
+        {
+          path: "category",
+        },
+        {
+          path: "materials",
+        },
+        {
+          path: "colorThemes",
+        },
+      ],
+    })
     .populate("client", "fullName email")
     .populate("designer", "fullName email");
 
@@ -339,7 +345,23 @@ export const rejectAssignment = async (
 
 export const getProjectsByDesigner = async (designerId: string) => {
   const projects = await Project.find({ designer: designerId })
-    .populate("sourceRequest")
+    .populate({
+      path: "sourceRequest",
+      populate: [
+        {
+          path: "catalogItem",
+        },
+        {
+          path: "category",
+        },
+        {
+          path: "materials",
+        },
+        {
+          path: "colorThemes",
+        },
+      ],
+    })
     .populate("client", "fullName email")
     .sort({ createdAt: -1 });
   return projects;

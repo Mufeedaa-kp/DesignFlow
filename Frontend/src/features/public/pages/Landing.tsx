@@ -48,7 +48,7 @@ const WHAT_WE_DO = [
     title: "Wardrobe",
     text: "Walk-ins and fitted wardrobes designed around how you actually store and dress.",
     image:
-      "https://images.unsplash.com/photo-1595428774223-ef52624120d2?auto=format&fit=crop&w=900&q=80",
+      "https://res.cloudinary.com/zmpym9nr/image/upload/v1793016144/WhatsApp_Image_2026-10-26_at_1.01.14_PM_4.jpg",
     to: "/products/wardrobe",
   },
 ];
@@ -331,7 +331,7 @@ const Landing = () => {
         <div className="mx-auto grid max-w-6xl items-center gap-14 px-6 py-24 sm:px-10 md:grid-cols-2">
           <div className="aspect-4/5 overflow-hidden border border-border">
             <img
-              src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=900&q=80"
+              src="https://res.cloudinary.com/zmpym9nr/image/upload/v1793016136/WhatsApp_Image_2026-10-26_at_1.01.14_PM_1.jpg"
               alt="DesignFlow interior"
               className="h-full w-full object-cover"
             />

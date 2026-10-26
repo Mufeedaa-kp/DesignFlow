@@ -1,9 +1,12 @@
 import { useRef, useState } from "react";
 import toast from "react-hot-toast";
-import { isAxiosError } from "axios";
 import { User as UserIcon, Camera } from "lucide-react";
 import { useAuth } from "../../auth/hooks/useAuth";
 import { useMyProfile, useUpdateProfile, useUploadProfileImage } from "../hooks/useProfile";
+import {
+  getApiError,
+  notifyClientError,
+} from "../../../shared/utils/errors";
  
 const inputClass =
   "w-full bg-white border border-border rounded-md text-charcoal text-sm " +
@@ -25,6 +28,10 @@ const ClientProfile = () => {
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<
+    Partial<Record<"fullName" | "phone" | "address", string>>
+  >({});
+  const [submitError, setSubmitError] = useState("");
  
   // Keep local form state in sync with fresh server data.
   // Adjusting state during render (not in an effect) avoids the extra render
@@ -60,11 +67,14 @@ const ClientProfile = () => {
       syncReduxUser(updated);
       toast.success("Profile photo updated");
     } catch (err: unknown) {
-      toast.error(isAxiosError(err) ? err.response?.data?.message || "Image upload failed" : "Image upload failed");
+      notifyClientError(err, "Image upload failed");
     }
   };
  
   const handleSave = async () => {
+    setFieldErrors({});
+    setSubmitError("");
+
     try {
       const updated = await saveProfile({
         fullName: fullName.trim(),
@@ -74,8 +84,31 @@ const ClientProfile = () => {
       syncReduxUser(updated);
       toast.success("Profile updated");
     } catch (err: unknown) {
-      toast.error(isAxiosError(err) ? err.response?.data?.message || "Update failed" : "Update failed");
+      const details = getApiError(err);
+      const backendFieldErrors =
+        details.fieldErrors as Partial<
+          Record<"fullName" | "phone" | "address", string>
+        >;
+
+      if (Object.keys(backendFieldErrors).length > 0) {
+        setFieldErrors(backendFieldErrors);
+        return;
+      }
+
+      if (details.isValidation) {
+        setSubmitError(details.message);
+        return;
+      }
+
+      notifyClientError(err, "Update failed");
     }
+  };
+
+  const clearFieldError = (
+    field: "fullName" | "phone" | "address"
+  ) => {
+    setFieldErrors((current) => ({ ...current, [field]: undefined }));
+    setSubmitError("");
   };
  
   if (isLoading) return <p className="text-sm text-muted max-w-2xl mx-auto">Loading profile...</p>;
@@ -126,8 +159,17 @@ const ClientProfile = () => {
             <input
               className={inputClass}
               value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
+              onChange={(e) => {
+                setFullName(e.target.value);
+                clearFieldError("fullName");
+              }}
+              aria-invalid={Boolean(fieldErrors.fullName)}
             />
+            {fieldErrors.fullName && (
+              <p role="alert" className="text-xs text-ember mt-1">
+                {fieldErrors.fullName}
+              </p>
+            )}
           </div>
           <div>
             <label className={labelClass}>Email Address</label>
@@ -139,8 +181,17 @@ const ClientProfile = () => {
               className={inputClass}
               placeholder="+1 (555) 000-0000"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={(e) => {
+                setPhone(e.target.value);
+                clearFieldError("phone");
+              }}
+              aria-invalid={Boolean(fieldErrors.phone)}
             />
+            {fieldErrors.phone && (
+              <p role="alert" className="text-xs text-ember mt-1">
+                {fieldErrors.phone}
+              </p>
+            )}
           </div>
           <div>
             <label className={labelClass}>Address</label>
@@ -148,10 +199,25 @@ const ClientProfile = () => {
               className={inputClass}
               placeholder="123 Park Avenue, New York, NY 10001"
               value={address}
-              onChange={(e) => setAddress(e.target.value)}
+              onChange={(e) => {
+                setAddress(e.target.value);
+                clearFieldError("address");
+              }}
+              aria-invalid={Boolean(fieldErrors.address)}
             />
+            {fieldErrors.address && (
+              <p role="alert" className="text-xs text-ember mt-1">
+                {fieldErrors.address}
+              </p>
+            )}
           </div>
         </div>
+
+        {submitError && (
+          <p role="alert" className="mb-4 text-xs text-ember">
+            {submitError}
+          </p>
+        )}
  
         <div className="flex justify-end pt-4 border-t border-border">
           <button

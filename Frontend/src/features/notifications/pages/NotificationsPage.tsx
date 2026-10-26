@@ -7,6 +7,7 @@ import {
   useMarkNotificationAsRead,
   useNotifications,
 } from "../hooks/useNotifications";
+import { getErrorMessage } from "../../../shared/utils/errors";
 
 const NotificationsPage = () => {
   const navigate = useNavigate();
@@ -38,7 +39,11 @@ const handleNotificationClick = (
   link?: string
 ) => {
   if (!isRead) {
-    markAsRead.mutate(notificationId);
+    markAsRead.mutate(notificationId, {
+      onError: (error) => {
+        toast.error(getErrorMessage(error));
+      },
+    });
   }
 
   if (link) {
@@ -56,6 +61,9 @@ const handleNotificationClick = (
         toast.success(
           "All notifications marked as read"
         );
+      },
+      onError: (error) => {
+        toast.error(getErrorMessage(error));
       },
     });
   };

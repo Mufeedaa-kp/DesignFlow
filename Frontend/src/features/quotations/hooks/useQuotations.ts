@@ -18,6 +18,8 @@ import {
   downloadQuotation,
 } from "../services/quotation.service";
 
+import { getApiError } from "../../../shared/utils/errors";
+
 import type {
   ICreateQuotationInput,
   IRejectQuotationInput,
@@ -43,6 +45,15 @@ export const useQuotationByProject = (
     queryFn: () =>
       getQuotationByProject(projectId),
     enabled: Boolean(projectId) && enabled,
+    retry: (failureCount, error) => {
+      const status = getApiError(error).status;
+
+      if (status === 403 || status === 404) {
+        return false;
+      }
+
+      return failureCount < 2;
+    },
   });
 };
 

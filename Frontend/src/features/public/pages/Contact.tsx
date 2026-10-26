@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import HeroBanner from "./HeroBanner";
 import api from "../../../services/api";
 import toast from "react-hot-toast";
+import { getErrorMessage } from "../../../shared/utils/errors";
 
 const contactSchema = z.object({
   name: z
@@ -55,12 +56,7 @@ const onSubmit = async (data: ContactFormData) => {
 
     reset();
   } catch (error: unknown) {
-    const message =
-      error instanceof Error
-        ? error.message
-        : "Failed to send your message";
-
-    toast.error(message);
+    toast.error(getErrorMessage(error));
   }
 };
 

@@ -3,24 +3,40 @@
 import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
-import { isAxiosError } from "axios";
 import api from "../../../services/api";
 import AuthLayout from "../layouts/AuthLayout";
 import { resetPasswordSchema } from "../schema/resetPassword.schema";
+import { getApiError } from "../../../shared/utils/errors";
+
+type ResetPasswordErrors = {
+  password?: string;
+  confirmPassword?: string;
+};
 
 const ResetPassword = () => {
   const { token } = useParams();
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [errors, setErrors] = useState<ResetPasswordErrors>({});
+  const [submitError, setSubmitError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
+    setSubmitError("");
 
     const result = resetPasswordSchema.safeParse({ password, confirmPassword });
     if (!result.success) {
-      toast.error(result.error.issues[0].message);
+      const fieldErrors: ResetPasswordErrors = {};
+      result.error.issues.forEach((issue) => {
+        const field = issue.path[0] as keyof ResetPasswordErrors;
+        if (!fieldErrors[field]) {
+          fieldErrors[field] = issue.message;
+        }
+      });
+      setErrors(fieldErrors);
       return;
     }
 
@@ -30,11 +46,16 @@ const ResetPassword = () => {
       toast.success("Password reset successful — please sign in");
       navigate("/login");
     } catch (err: unknown) {
-      if (isAxiosError(err)) {
-        toast.error(err.response?.data?.message || "Reset link invalid or expired");
-      } else {
-        toast.error("Something went wrong");
+      const details = getApiError(err);
+      const backendFieldErrors =
+        details.fieldErrors as ResetPasswordErrors;
+
+      if (Object.keys(backendFieldErrors).length > 0) {
+        setErrors(backendFieldErrors);
+        return;
       }
+
+      setSubmitError(details.message);
     } finally {
       setLoading(false);
     }
@@ -59,10 +80,20 @@ const ResetPassword = () => {
             type="password"
             placeholder="••••••••"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setErrors((current) => ({ ...current, password: undefined }));
+              setSubmitError("");
+            }}
             required
+            aria-invalid={Boolean(errors.password)}
             className={inputClass}
           />
+          {errors.password && (
+            <p role="alert" className="text-xs text-ember mt-1">
+              {errors.password}
+            </p>
+          )}
         </div>
 
         <div>
@@ -73,11 +104,30 @@ const ResetPassword = () => {
             type="password"
             placeholder="••••••••"
             value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            onChange={(e) => {
+              setConfirmPassword(e.target.value);
+              setErrors((current) => ({
+                ...current,
+                confirmPassword: undefined,
+              }));
+              setSubmitError("");
+            }}
             required
+            aria-invalid={Boolean(errors.confirmPassword)}
             className={inputClass}
           />
+          {errors.confirmPassword && (
+            <p role="alert" className="text-xs text-ember mt-1">
+              {errors.confirmPassword}
+            </p>
+          )}
         </div>
+
+        {submitError && (
+          <p role="alert" className="text-xs text-ember">
+            {submitError}
+          </p>
+        )}
 
         <button
           type="submit"

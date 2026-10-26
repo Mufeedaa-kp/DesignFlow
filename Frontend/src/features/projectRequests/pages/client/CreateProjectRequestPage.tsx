@@ -5,6 +5,7 @@ import {
   useCreateProjectRequest,
   useUploadProjectRequestImage,
 } from "../../hooks/useClientProjectRequests";
+import { notifyClientError } from "../../../../shared/utils/errors";
 
 import { useMyProfile } from "../../../profile/hooks/useProfile";
 
@@ -213,6 +214,7 @@ const [formData, setFormData] = useState({
             "Failed to upload reference image:",
             error
           );
+          notifyClientError(error, "Image upload failed");
         }
       }
 
@@ -298,7 +300,8 @@ const [formData, setFormData] = useState({
             error
           );
 
-          toast.error(
+          notifyClientError(
+            error,
             "Failed to submit project request. Please try again."
           );
         },

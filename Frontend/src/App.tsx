@@ -9,6 +9,7 @@ import {
 import { Toaster } from "react-hot-toast";
 
 import ProtectedRoute from "./routes/ProtectedRoute";
+import ScrollToTop from "./routes/ScrollToTop";
 
 //public
 
@@ -80,7 +81,7 @@ import DesignerMoodBoardDetailPage from "./features/moodboards/pages/DesignerMoo
 import ClientDashboard from "./features/dashboard/pages/clientDashboard";
 
 import MyProjectRequestsPage from "./features/projectRequests/pages/client/MyProjectRequestsPage";
-import ProjectRequestDetailsPage from "./features/projectRequests/pages/client/ProjectRequestDetailsPage";
+import ClientProjectRequestDetailsPage from "./features/projectRequests/pages/client/ClientProjectRequestDetailsPage";
 import CreateProjectRequestPage from "./features/projectRequests/pages/client/CreateProjectRequestPage";
 
 import ClientProfile from "./features/profile/pages/ClientProfile";
@@ -97,6 +98,7 @@ function App() {
   return (
     <BrowserRouter>
       <Toaster position="top-center" />
+      <ScrollToTop />
 
       <Routes>
 
@@ -332,12 +334,12 @@ function App() {
 
           <Route
             path="quotations"
-            element={<DesignerQuotationDetailsPage />}
+            element={<DesignerQuotationsPage />}
           />
 
           <Route
             path="projects/:projectId/quotation"
-            element={<DesignerQuotationsPage />}
+            element={<DesignerQuotationDetailsPage />}
           />
 
           <Route
@@ -387,7 +389,7 @@ function App() {
 
           <Route
             path="requests/:id"
-            element={<ProjectRequestDetailsPage />}
+            element={<ClientProjectRequestDetailsPage />}
           />
 
           <Route

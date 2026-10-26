@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import { notifyAdminError } from "../../../shared/utils/errors";
+
 import CategoryForm from "../components/CategoryForm";
 import CategoryCard from "../components/CategoryCard";
 import MaterialForm from "../components/MaterialForm";
@@ -155,6 +157,9 @@ const colorThemesTotalPages =
       onSuccess: () => {
         setShowCategoryForm(false);
       },
+      onError: (error) => {
+        notifyAdminError(error, "Failed to create category");
+      },
     });
   };
 
@@ -177,6 +182,9 @@ const colorThemesTotalPages =
           setShowCategoryForm(false);
           setEditingCategory(undefined);
         },
+        onError: (error) => {
+          notifyAdminError(error, "Failed to update category");
+        },
       }
     );
   };
@@ -190,6 +198,9 @@ const colorThemesTotalPages =
       onSuccess: () => {
         setShowMaterialForm(false);
         setMaterialsPage(1);
+      },
+      onError: (error) => {
+        notifyAdminError(error, "Failed to create material");
       },
     });
   };
@@ -211,6 +222,9 @@ const colorThemesTotalPages =
           setShowMaterialForm(false);
           setEditingMaterial(undefined);
         },
+        onError: (error) => {
+          notifyAdminError(error, "Failed to update material");
+        },
       }
     );
   };
@@ -222,9 +236,12 @@ const colorThemesTotalPages =
   ) => {
     createColorThemeMutation.mutate(data, {
       onSuccess: () => {
-  setShowColorThemeForm(false);
-  setColorThemesPage(1);
-},
+        setShowColorThemeForm(false);
+        setColorThemesPage(1);
+      },
+      onError: (error) => {
+        notifyAdminError(error, "Failed to create color theme");
+      },
     });
   };
 
@@ -244,6 +261,9 @@ const colorThemesTotalPages =
         onSuccess: () => {
           setShowColorThemeForm(false);
           setEditingColorTheme(undefined);
+        },
+        onError: (error) => {
+          notifyAdminError(error, "Failed to update color theme");
         },
       }
     );
@@ -406,7 +426,15 @@ const colorThemesTotalPages =
                       )
                     ) {
                       deleteCategoryMutation.mutate(
-                        category._id
+                        category._id,
+                        {
+                          onError: (error) => {
+                            notifyAdminError(
+                              error,
+                              "Failed to delete category"
+                            );
+                          },
+                        }
                       );
                     }
                   }}
@@ -475,7 +503,15 @@ const colorThemesTotalPages =
                         )
                       ) {
                         deleteMaterialMutation.mutate(
-                          material._id
+                          material._id,
+                          {
+                            onError: (error) => {
+                              notifyAdminError(
+                                error,
+                                "Failed to delete material"
+                              );
+                            },
+                          }
                         );
                       }
                     }}
@@ -584,7 +620,15 @@ const colorThemesTotalPages =
             )
           ) {
             deleteColorThemeMutation.mutate(
-              colorTheme._id
+              colorTheme._id,
+              {
+                onError: (error) => {
+                  notifyAdminError(
+                    error,
+                    "Failed to delete color theme"
+                  );
+                },
+              }
             );
           }
         }}

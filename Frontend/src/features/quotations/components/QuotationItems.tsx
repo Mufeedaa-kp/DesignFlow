@@ -42,7 +42,7 @@ const QuotationItems = ({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-[#3F332A]">
+        <h3 className="text-sm font-semibold text-charcoal">
           Quotation Items
         </h3>
 
@@ -55,7 +55,7 @@ const QuotationItems = ({
               unitPrice: 0,
             })
           }
-          className="rounded-md border border-[#8B5E3C] px-3 py-1.5 text-xs font-medium text-[#8B5E3C] transition hover:bg-[#8B5E3C] hover:text-white"
+          className="rounded-md border border-clay px-3 py-1.5 text-xs font-medium text-clay transition hover:bg-clay hover:text-cream"
         >
           + Add Item
         </button>
@@ -77,12 +77,12 @@ const QuotationItems = ({
           return (
             <div
               key={field.id}
-              className="rounded-lg border border-[#E5DDD5] bg-white p-4"
+              className="rounded-lg border border-border bg-surface p-4"
             >
               <div className="grid grid-cols-1 gap-3 md:grid-cols-12">
                 
                 <div className="md:col-span-4">
-                  <label className="mb-1 block text-xs font-medium text-[#6B5A4A]">
+                  <label className="mb-1 block text-xs font-medium text-muted">
                     Description
                   </label>
 
@@ -91,11 +91,11 @@ const QuotationItems = ({
                       `items.${index}.description`
                     )}
                     placeholder="Item description"
-                    className="w-full rounded-md border border-[#D9C7A3] px-3 py-2 text-sm outline-none focus:border-[#8B5E3C]"
+                    className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-charcoal outline-none focus:border-amber"
                   />
 
                   {errors.items?.[index]?.description && (
-                    <p className="mt-1 text-xs text-red-500">
+                    <p className="mt-1 text-xs text-ember">
                       {
                         errors.items[index]?.description
                           ?.message
@@ -106,7 +106,7 @@ const QuotationItems = ({
 
                 {/* Price */}
                 <div className="md:col-span-2">
-                  <label className="mb-1 block text-xs font-medium text-[#6B5A4A]">
+                  <label className="mb-1 block text-xs font-medium text-muted">
                     Price
                   </label>
 
@@ -120,11 +120,11 @@ const QuotationItems = ({
                       }
                     )}
                     placeholder="0"
-                    className="w-full rounded-md border border-[#D9C7A3] px-3 py-2 text-sm outline-none focus:border-[#8B5E3C]"
+                    className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-charcoal outline-none focus:border-amber"
                   />
 
                   {errors.items?.[index]?.unitPrice && (
-                    <p className="mt-1 text-xs text-red-500">
+                    <p className="mt-1 text-xs text-ember">
                       {
                         errors.items[index]?.unitPrice
                           ?.message
@@ -135,7 +135,7 @@ const QuotationItems = ({
 
                 {/* Quantity */}
                 <div className="md:col-span-2">
-                  <label className="mb-1 block text-xs font-medium text-[#6B5A4A]">
+                  <label className="mb-1 block text-xs font-medium text-muted">
                     Quantity
                   </label>
 
@@ -148,11 +148,11 @@ const QuotationItems = ({
                         valueAsNumber: true,
                       }
                     )}
-                    className="w-full rounded-md border border-[#D9C7A3] px-3 py-2 text-sm outline-none focus:border-[#8B5E3C]"
+                    className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-charcoal outline-none focus:border-amber"
                   />
 
                   {errors.items?.[index]?.quantity && (
-                    <p className="mt-1 text-xs text-red-500">
+                    <p className="mt-1 text-xs text-ember">
                       {
                         errors.items[index]?.quantity
                           ?.message
@@ -163,11 +163,11 @@ const QuotationItems = ({
 
                 {/* Value */}
                 <div className="md:col-span-2">
-                  <label className="mb-1 block text-xs font-medium text-[#6B5A4A]">
+                  <label className="mb-1 block text-xs font-medium text-muted">
                     Value
                   </label>
 
-                  <div className="flex h- 9.5 items-center rounded-md border border-[#E5DDD5] bg-[#F8F6F2] px-3 text-sm font-medium text-[#3F332A]">
+                  <div className="flex h-10 items-center rounded-md border border-border bg-panel px-3 text-sm font-medium text-charcoal">
                     {formatCurrency(value)}
                   </div>
                 </div>
@@ -178,7 +178,7 @@ const QuotationItems = ({
                     type="button"
                     onClick={() => remove(index)}
                     disabled={fields.length === 1}
-                    className="w-full rounded-md border border-red-200 px-3 py-2 text-xs text-red-500 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="w-full rounded-md border border-ember/25 px-3 py-2 text-xs text-ember transition hover:bg-ember/10 disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     Remove
                   </button>
@@ -190,7 +190,7 @@ const QuotationItems = ({
       </div>
 
       {errors.items?.root?.message && (
-        <p className="text-xs text-red-500">
+        <p className="text-xs text-ember">
           {errors.items.root.message}
         </p>
       )}

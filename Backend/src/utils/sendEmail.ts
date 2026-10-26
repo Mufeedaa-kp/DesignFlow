@@ -11,7 +11,11 @@ interface SendEmailOptions {
   html: string;
 }
 
-export const sendEmail = async ({ to, subject, html }: SendEmailOptions) => {
+export const sendEmail = async ({
+  to,
+  subject,
+  html,
+}: SendEmailOptions): Promise<boolean> => {
   try {
     const { error } = await resend.emails.send({
       from: env.RESEND_FROM_EMAIL,
@@ -19,9 +23,21 @@ export const sendEmail = async ({ to, subject, html }: SendEmailOptions) => {
       subject,
       html,
     });
-    if (error) logger.error("sendEmail failed:", error);
+
+    if (error) {
+      logger.error("sendEmail failed:", {
+        name: error.name,
+        message: error.message,
+      });
+      return false;
+    }
+
+    return true;
   } catch (error) {
-    
-    logger.error("sendEmail failed:", error);
+    logger.error(
+      "sendEmail failed:",
+      error instanceof Error ? error.message : "Unknown email error"
+    );
+    return false;
   }
 };

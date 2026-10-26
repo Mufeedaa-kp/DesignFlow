@@ -1,5 +1,9 @@
 import { useState, type ReactNode } from "react";
-import { Link, useParams } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useParams,
+} from "react-router-dom";
 import toast from "react-hot-toast";
 
 import {
@@ -13,25 +17,18 @@ import { useQuotationByProject } from "../../../quotations/hooks/useQuotations";
 
 import { useDesignerMoodBoard } from "../../../moodboards/hooks/useMoodBoards";
 
+import { quotationStatusLabels } from "../../../quotations/utils/quotationPresentation";
+
+import { moodBoardStatusLabels } from "../../../moodboards/utils/moodboardPresentation";
+
+import { getDesignerProjectBackLink } from "../../utils/projectNavigation";
+
+import SafeImage from "../../../../shared/components/ui/SafeImage";
+
 import type {
   IProjectSourceRequest,
   ProjectStatus,
 } from "../../types/project.types";
-
-const quotationStatusLabels: Record<string, string> = {
-  draft: "Draft",
-  pending_admin_approval: "Pending Admin Approval",
-  approved: "Approved",
-  rejected: "Rejected",
-  accepted: "Accepted",
-};
-
-const moodBoardStatusLabels: Record<string, string> = {
-  draft: "Draft",
-  submitted: "Ready for Review",
-  changes_requested: "Changes Requested",
-  approved: "Approved",
-};
 
 const formatMoney = (amount?: number) => {
   if (amount === undefined || amount === null) {
@@ -61,6 +58,58 @@ const InfoRow = ({
   </div>
 );
 
+const DesignImageCard = ({
+  label,
+  name,
+  image,
+}: {
+  label: string;
+  name?: string;
+  image?: string;
+}) => (
+  <div className="overflow-hidden rounded-lg border border-border bg-surface">
+    <SafeImage
+      src={image}
+      alt={name || label}
+      className="h-36 w-full object-cover"
+    />
+
+    <div className="p-3">
+      <p className="text-[10px] font-semibold uppercase tracking-wide text-muted">
+        {label}
+      </p>
+
+      <p className="mt-1 truncate text-sm font-medium text-charcoal">
+        {name || "Not available"}
+      </p>
+    </div>
+  </div>
+);
+
+const OptionImage = ({
+  image,
+  name,
+}: {
+  image?: string;
+  name: string;
+}) => (
+  <div className="flex items-center gap-3 rounded-lg border border-border bg-surface p-3">
+    <SafeImage
+      src={image}
+      alt={name}
+      className="h-14 w-14 shrink-0 rounded-md object-cover"
+    />
+
+    <div className="min-w-0">
+      <p className="truncate text-sm font-medium text-charcoal">
+        {name}
+      </p>
+
+      <p className="text-xs text-muted">Selected option</p>
+    </div>
+  </div>
+);
+
 const PROJECT_STATUS_OPTIONS: {
   value: ProjectStatus;
   label: string;
@@ -82,12 +131,18 @@ const PROJECT_STATUS_OPTIONS: {
 const statusStyles: Record<ProjectStatus, string> = {
   planning: "bg-amber/15 text-amber",
   in_progress: "bg-clay/15 text-clay",
-  completed: "bg-emerald-500/15 text-emerald-600",
+  completed: "bg-olive/15 text-olive",
 };
 
 
 const DesignerProjectDetail = () => {
   const { id } = useParams<{ id: string }>();
+
+  const location = useLocation();
+
+  const backLink = getDesignerProjectBackLink(
+    location.state
+  );
 
   const {
     data: project,
@@ -129,7 +184,7 @@ const DesignerProjectDetail = () => {
   if (isError || !project) {
     return (
       <div className="p-6">
-        <p className="text-sm text-red-500">
+        <p className="text-sm text-ember">
           Failed to load project details.
         </p>
       </div>
@@ -145,6 +200,23 @@ const DesignerProjectDetail = () => {
     typeof project.client === "object"
       ? project.client
       : undefined;
+
+  const category =
+    typeof sourceRequest?.category === "object"
+      ? sourceRequest.category
+      : undefined;
+
+  const catalogItem =
+    typeof sourceRequest?.catalogItem === "object"
+      ? sourceRequest.catalogItem
+      : undefined;
+
+  const referenceImages = Array.from(
+    new Set([
+      ...(sourceRequest?.referenceImages ?? []),
+      ...(sourceRequest?.images ?? []),
+    ])
+  );
 
   const handleAcceptAssignment = async () => {
     try {
@@ -221,10 +293,10 @@ const DesignerProjectDetail = () => {
       {/* Header */}
       <div className="mb-8">
         <Link
-          to="/designer/projects"
+          to={backLink.to}
           className="text-xs text-muted hover:text-charcoal transition-colors"
         >
-          ← Back to Projects
+          &larr; {backLink.label}
         </Link>
 
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mt-4">
@@ -233,7 +305,7 @@ const DesignerProjectDetail = () => {
               Project Details
             </p>
 
-            <h1 className="text-2xl font-semibold text-charcoal mt-2">
+            <h1 className="mt-2 font-serif text-3xl font-bold text-charcoal">
               {sourceRequest?.projectName || "Project"}
             </h1>
 
@@ -316,13 +388,13 @@ const DesignerProjectDetail = () => {
               )}
 
               {project.designerStatus === "accepted" && (
-                <span className="px-3 py-1.5 rounded-full bg-emerald-50 text-xs font-medium text-emerald-600">
+                <span className="px-3 py-1.5 rounded-full bg-olive/10 text-xs font-medium text-olive">
                   Assignment Accepted
                 </span>
               )}
 
               {project.designerStatus === "rejected" && (
-                <span className="px-3 py-1.5 rounded-full bg-red-50 text-xs font-medium text-red-500">
+                <span className="px-3 py-1.5 rounded-full bg-ember/10 text-xs font-medium text-ember">
                   Assignment Rejected
                 </span>
               )}
@@ -352,7 +424,7 @@ const DesignerProjectDetail = () => {
                 disabled={
                   acceptAssignment.isPending
                 }
-                className="px-5 py-2.5 rounded-md bg-charcoal text-cream text-xs uppercase tracking-wider font-semibold hover:bg-black transition-colors disabled:opacity-50"
+                className="px-5 py-2.5 rounded-md bg-charcoal text-cream text-xs uppercase tracking-wider font-semibold hover:bg-ember transition-colors disabled:opacity-50"
               >
                 {acceptAssignment.isPending
                   ? "Accepting..."
@@ -364,7 +436,7 @@ const DesignerProjectDetail = () => {
                 onClick={() =>
                   setIsRejecting(true)
                 }
-                className="px-5 py-2.5 rounded-md border border-border text-charcoal text-xs uppercase tracking-wider font-semibold hover:bg-white transition-colors"
+                className="px-5 py-2.5 rounded-md border border-border text-charcoal text-xs uppercase tracking-wider font-semibold hover:bg-surface transition-colors"
               >
                 Reject Assignment
               </button>
@@ -384,7 +456,7 @@ const DesignerProjectDetail = () => {
                 }
                 rows={4}
                 placeholder="Please provide a reason for rejecting this assignment..."
-                className="w-full border border-border rounded-md bg-white px-4 py-3 text-sm text-charcoal outline-none focus:border-charcoal resize-none"
+                className="w-full resize-none rounded-md border border-border bg-surface px-4 py-3 text-sm text-charcoal outline-none focus:border-amber"
               />
 
               <div className="flex gap-3 mt-4">
@@ -395,7 +467,7 @@ const DesignerProjectDetail = () => {
                     rejectAssignment.isPending ||
                     !rejectionReason.trim()
                   }
-                  className="px-5 py-2.5 rounded-md bg-red-500 text-white text-xs uppercase tracking-wider font-semibold hover:bg-red-600 transition-colors disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-md bg-ember text-cream text-xs uppercase tracking-wider font-semibold hover:bg-charcoal transition-colors disabled:opacity-50"
                 >
                   {rejectAssignment.isPending
                     ? "Rejecting..."
@@ -408,7 +480,7 @@ const DesignerProjectDetail = () => {
                     setIsRejecting(false);
                     setRejectionReason("");
                   }}
-                  className="px-5 py-2.5 rounded-md border border-border text-charcoal text-xs uppercase tracking-wider font-semibold hover:bg-white transition-colors"
+                  className="px-5 py-2.5 rounded-md border border-border text-charcoal text-xs uppercase tracking-wider font-semibold hover:bg-surface transition-colors"
                 >
                   Cancel
                 </button>
@@ -503,7 +575,7 @@ const DesignerProjectDetail = () => {
       <button
         type="button"
         disabled
-        className="text-xs uppercase tracking-wider font-semibold px-4 py-2 rounded-md bg-gray-200 text-gray-400 cursor-not-allowed"
+        className="cursor-not-allowed rounded-md bg-panel px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted"
       >
         Create Quotation
       </button>
@@ -565,7 +637,7 @@ const DesignerProjectDetail = () => {
       <button
         type="button"
         disabled
-        className="text-xs uppercase tracking-wider font-semibold px-4 py-2 rounded-md bg-gray-200 text-gray-400 cursor-not-allowed"
+        className="cursor-not-allowed rounded-md bg-panel px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted"
       >
         Create Mood Board
       </button>
@@ -580,27 +652,21 @@ const DesignerProjectDetail = () => {
           Project Details
         </p>
 
-        <div>
-          <InfoRow
+        <div className="mb-6 grid gap-4 sm:grid-cols-2">
+          <DesignImageCard
             label="Category"
-            value={
-              typeof sourceRequest?.category ===
-              "object"
-                ? sourceRequest.category.name
-                : sourceRequest?.category
-            }
+            name={category?.name}
+            image={category?.image}
           />
 
-          <InfoRow
+          <DesignImageCard
             label="Catalog Item"
-            value={
-              typeof sourceRequest?.catalogItem ===
-              "object"
-                ? sourceRequest.catalogItem.name
-                : sourceRequest?.catalogItem
-            }
+            name={catalogItem?.name}
+            image={catalogItem?.image}
           />
+        </div>
 
+        <div>
           <InfoRow
             label="Need By"
             value={
@@ -642,18 +708,21 @@ const DesignerProjectDetail = () => {
               Materials
             </p>
 
-            <div className="flex flex-wrap gap-2">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {sourceRequest.materials.map(
-                (material, index) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1.5 bg-white border border-border rounded-md text-xs text-charcoal"
-                  >
-                    {typeof material === "object"
-                      ? material.name
-                      : material}
-                  </span>
-                )
+                (material, index) =>
+                  typeof material === "object" ? (
+                    <OptionImage
+                      key={material._id ?? index}
+                      name={material.name}
+                      image={material.images?.[0]}
+                    />
+                  ) : (
+                    <OptionImage
+                      key={`material-${index}`}
+                      name="Material unavailable"
+                    />
+                  )
               )}
             </div>
           </div>
@@ -666,18 +735,21 @@ const DesignerProjectDetail = () => {
               Color Themes
             </p>
 
-            <div className="flex flex-wrap gap-2">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {sourceRequest.colorThemes.map(
-                (theme, index) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1.5 bg-white border border-border rounded-md text-xs text-charcoal"
-                  >
-                    {typeof theme === "object"
-                      ? theme.name
-                      : theme}
-                  </span>
-                )
+                (theme, index) =>
+                  typeof theme === "object" ? (
+                    <OptionImage
+                      key={theme._id ?? index}
+                      name={theme.name}
+                      image={theme.image}
+                    />
+                  ) : (
+                    <OptionImage
+                      key={`theme-${index}`}
+                      name="Color theme unavailable"
+                    />
+                  )
               )}
             </div>
           </div>
@@ -694,7 +766,7 @@ const DesignerProjectDetail = () => {
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="bg-white border border-border rounded-md p-4">
+            <div className="bg-surface border border-border rounded-md p-4">
               <p className="text-xs text-muted">
                 Height
               </p>
@@ -704,7 +776,7 @@ const DesignerProjectDetail = () => {
               </p>
             </div>
 
-            <div className="bg-white border border-border rounded-md p-4">
+            <div className="bg-surface border border-border rounded-md p-4">
               <p className="text-xs text-muted">
                 Width
               </p>
@@ -714,7 +786,7 @@ const DesignerProjectDetail = () => {
               </p>
             </div>
 
-            <div className="bg-white border border-border rounded-md p-4">
+            <div className="bg-surface border border-border rounded-md p-4">
               <p className="text-xs text-muted">
                 Square Feet
               </p>
@@ -798,61 +870,27 @@ const DesignerProjectDetail = () => {
       )}
 
       {/* Reference Images */}
-      {sourceRequest?.referenceImages?.length ? (
+      {referenceImages.length > 0 ? (
         <div className="bg-cream border border-border rounded-lg p-8 mb-6">
           <p className="text-xs text-muted uppercase tracking-wide font-semibold mb-4">
             Reference Images
           </p>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {sourceRequest.referenceImages.map(
-              (image, index) => (
-                <button
-                  type="button"
-                  key={index}
-                  onClick={() =>
-                    setSelectedImage(image)
-                  }
-                  className="aspect-square overflow-hidden rounded-md border border-border bg-white"
-                >
-                  <img
-                    src={image}
-                    alt={`Reference ${index + 1}`}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform"
-                  />
-                </button>
-              )
-            )}
-          </div>
-        </div>
-      ) : null}
-
-     
-      {sourceRequest?.images?.length ? (
-        <div className="bg-cream border border-border rounded-lg p-8 mb-6">
-          <p className="text-xs text-muted uppercase tracking-wide font-semibold mb-4">
-            Reference Images
-          </p>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {sourceRequest.images.map(
-              (image, index) => (
-                <button
-                  type="button"
-                  key={index}
-                  onClick={() =>
-                    setSelectedImage(image)
-                  }
-                  className="aspect-square overflow-hidden rounded-md border border-border bg-white"
-                >
-                  <img
-                    src={image}
-                    alt={`Reference ${index + 1}`}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform"
-                  />
-                </button>
-              )
-            )}
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+            {referenceImages.map((image, index) => (
+              <button
+                type="button"
+                key={`${image}-${index}`}
+                onClick={() => setSelectedImage(image)}
+                className="aspect-square overflow-hidden rounded-md border border-border bg-surface"
+              >
+                <SafeImage
+                  src={image}
+                  alt={`Reference ${index + 1}`}
+                  className="h-full w-full object-cover transition-transform hover:scale-105"
+                />
+              </button>
+            ))}
           </div>
         </div>
       ) : null}
@@ -860,7 +898,7 @@ const DesignerProjectDetail = () => {
       {/* Image Preview */}
       {selectedImage && (
         <div
-          className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-6"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-charcoal/80 p-6"
           onClick={() =>
             setSelectedImage(null)
           }
@@ -876,7 +914,7 @@ const DesignerProjectDetail = () => {
               onClick={() =>
                 setSelectedImage(null)
               }
-              className="absolute -top-10 right-0 text-white text-sm hover:text-gray-300"
+              className="absolute -top-10 right-0 text-sm text-cream transition-colors hover:text-panel"
             >
               Close
             </button>

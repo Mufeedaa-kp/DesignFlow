@@ -19,7 +19,7 @@ const changeRequestSchema = z.object({
     .max(2000, "Feedback cannot exceed 2000 characters"),
 });
 
-import { getErrorMessage } from "../../../shared/utils/errors";
+import { getErrorMessage, notifyClientError } from "../../../shared/utils/errors";
 
 type ChangeRequestFormValues = z.infer<typeof changeRequestSchema>;
 
@@ -114,7 +114,7 @@ export default function ClientMoodBoardDetailPage() {
 
       toast.success("Mood board approved successfully");
     } catch (error) {
-      toast.error(getErrorMessage(error));
+      notifyClientError(error);
     }
   };
 
@@ -183,7 +183,7 @@ export default function ClientMoodBoardDetailPage() {
       setReferenceImages([]);
       setShowChangesForm(false);
     } catch (error) {
-      toast.error(getErrorMessage(error));
+      notifyClientError(error);
     }
   };
 
