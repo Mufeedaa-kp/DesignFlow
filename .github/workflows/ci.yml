@@ -39,3 +39,25 @@ jobs:
 
       - name: Build Frontend
         run: npm run build --prefix Frontend
+
+  deploy:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy backend to EC2
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script_stop: true
+          script: |
+            cd ~/DesignFlow
+            git fetch origin
+            git reset --hard origin/main
+            cd Backend
+            npm ci
+            npm run build
+            pm2 restart DesignFlow-Backend --update-env
