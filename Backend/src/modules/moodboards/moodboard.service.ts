@@ -334,7 +334,7 @@ await createNotificationService({
   message:
     "A new Mood Board has been submitted for your project.",
   project: moodBoard.project,
-  link: `/client/moodbaords/${moodBoard.project}`,
+    link: `/client/moodboards/${moodBoard.project}`,
 });
 
 return moodBoard;

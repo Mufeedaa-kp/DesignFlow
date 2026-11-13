@@ -25,15 +25,33 @@ let refreshQueue: Array<
   (token: string) => void
 > = [];
 
+const AUTH_ENDPOINTS = [
+  "/auth/login",
+  "/auth/register/request-otp",
+  "/auth/register/resend",
+  "/auth/register/verify",
+  "/auth/google",
+  "/auth/logout",
+  "/auth/refresh",
+];
+
+const isAuthEndpoint = (url?: string) => {
+  if (!url) {
+    return false;
+  }
+
+  return AUTH_ENDPOINTS.some((endpoint) =>
+    url.includes(endpoint)
+  );
+};
+
 api.interceptors.response.use(
   (response) => response,
 
   async (error) => {
     const originalRequest = error.config;
 
-    if (
-      originalRequest?.url?.includes("/auth/refresh")
-    ) {
+    if (isAuthEndpoint(originalRequest?.url)) {
       return Promise.reject(error);
     }
 

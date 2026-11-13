@@ -42,99 +42,53 @@ const ProjectRequestDesignPage = ({
   const totalPages =
     catalogData?.pagination?.totalPages ?? 1;
 
-  return (
-    <>
-      {/* Header */}
-      <div className="mb-5">
-        <h1 className="text-xl font-semibold text-gray-800 sm:text-2xl">
-          Choose Your Design
-        </h1>
+    return (
+    <div className="border border-border bg-white p-6 sm:p-8">
+      <h2 className="font-serif text-2xl text-charcoal">Choose your design</h2>
+      <p className="mb-6 mt-1 text-sm text-muted">
+        Select the design you want for your project.
+      </p>
 
-        <p className="mt-1 text-xs leading-5 text-gray-500 sm:text-sm">
-          Select the design you want for your project.
-        </p>
+      {isLoading && (
+        <div className="bg-panel p-6 text-center text-sm text-muted">
+          Loading designs...
+        </div>
+      )}
+
+      {isError && (
+        <div className="bg-red-50 p-6 text-center text-sm text-red-500">
+          Failed to load designs.
+        </div>
+      )}
+
+      {!isLoading && !isError && (
+        <CatalogItemSelector
+          catalogItems={catalogItems}
+          selectedCatalogItemId={selectedCatalogItemId}
+          onSelect={onSelectCatalogItem}
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
+      )}
+
+      <div className="mt-8 flex items-center justify-between border-t border-border pt-6">
+        <button
+          type="button"
+          onClick={onBack}
+          className="border border-border px-8 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-charcoal transition hover:bg-panel"
+        >
+          Back
+        </button>
+        <button
+          type="button"
+          onClick={onContinue}
+          className="border border-[var(--color-brown)] bg-[var(--color-brown)] px-8 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-cream transition hover:brightness-110"
+        >
+          Continue
+        </button>
       </div>
-
-      {/* Steps */}
-      <div className="mb-5 flex items-center gap-2 overflow-x-auto whitespace-nowrap text-[11px] sm:text-xs">
-        <span className="text-gray-400">
-          1. Category
-        </span>
-
-        <span className="text-gray-300">→</span>
-
-        <span className="font-medium text-[#8B5E3C]">
-          2. Design
-        </span>
-
-        <span className="text-gray-300">→</span>
-
-        <span className="text-gray-400">
-          3. Options
-        </span>
-
-        <span className="text-gray-300">→</span>
-
-        <span className="text-gray-400">
-          4. Requirements
-        </span>
-
-        <span className="text-gray-300">→</span>
-
-        <span className="text-gray-400">
-          5. Review
-        </span>
-      </div>
-
-      {/* Content */}
-      <div className="rounded-xl bg-white p-4 shadow-sm sm:p-5">
-        {isLoading && (
-          <div className="rounded-lg bg-[#F8F6F2] p-6 text-center">
-            <p className="text-xs text-gray-500 sm:text-sm">
-              Loading designs...
-            </p>
-          </div>
-        )}
-
-        {isError && (
-          <div className="rounded-lg bg-red-50 p-6 text-center">
-            <p className="text-xs text-red-500 sm:text-sm">
-              Failed to load designs.
-            </p>
-          </div>
-        )}
-
-        {!isLoading && !isError && (
-          <CatalogItemSelector
-            catalogItems={catalogItems}
-            selectedCatalogItemId={selectedCatalogItemId}
-            onSelect={onSelectCatalogItem}
-            page={page}
-            totalPages={totalPages}
-            onPageChange={setPage}
-          />
-        )}
-
-        {/* Actions */}
-        <div className="mt-10 flex items-center justify-between border-t border-gray-100 pt-6">
-  <button
-    type="button"
-    onClick={onBack}
-    className="rounded-lg border border-gray-200 px-6 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
-  >
-    Back
-  </button>
-
-  <button
-    type="button"
-    onClick={onContinue}
-    className="rounded-lg bg-[#8B5E3C] px-6 py-3 text-sm font-medium text-white transition hover:bg-[#70482F]"
-  >
-    Continue
-  </button>
-</div>
-      </div>
-    </>
+    </div>
   );
 };
 

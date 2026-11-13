@@ -8,7 +8,8 @@ export interface ProductCategory {
   slug: string;
   title: string;
   intro: string;
-  image?: string;
+  image?: string; // card image on Products page
+  heroImage?: string; // hero image on details page
   works: ProductWork[];
 }
 
@@ -24,6 +25,7 @@ export const PRODUCT_CATEGORIES: ProductCategory[] = [
       "We design modular kitchens for our clients to make their homes look more attractive and functional. Our range includes straight, L-shaped, and island layouts, tailored to how you cook and gather.",
 
     image: "https://res.cloudinary.com/zmpym9nr/image/upload/v1793016138/WhatsApp_Image_2026-10-26_at_1.01.14_PM_2.jpg",
+    heroImage: "https://res.cloudinary.com/zmpym9nr/image/upload/v1793084467/Crafting_Perfection_How_Kitchen_Bath_Remodelers_Transform_Your_Space.jpg",
 
     works: [
       {
@@ -58,6 +60,7 @@ export const PRODUCT_CATEGORIES: ProductCategory[] = [
       "Custom, handcrafted furniture built around your space and how you actually live in it — from living room pieces to dining sets and built-ins.",
 
     image: "https://res.cloudinary.com/zmpym9nr/image/upload/v1793016141/WhatsApp_Image_2026-10-26_at_1.01.14_PM_3.jpg",
+    heroImage: "https://res.cloudinary.com/zmpym9nr/image/upload/v1794477138/66d3dec788d8c358685fb81cca13c544.jpg",
 
     works: [
       {
@@ -92,6 +95,7 @@ export const PRODUCT_CATEGORIES: ProductCategory[] = [
       "Walk-ins and fitted wardrobes designed around how you store, dress, and move through your room every day.",
 
     image: "https://res.cloudinary.com/zmpym9nr/image/upload/v1793016166/WhatsApp_Image_2026-10-26_at_1.01.14_PM.jpg",
+    heroImage: "https://res.cloudinary.com/zmpym9nr/image/upload/v1793096376/WhatsApp_Image_2026-10-27_at_3.25.14_PM_4.jpg",
 
     works: [
       {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
+import { User, Mail, Lock, Phone, MapPin } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import {
   useRequestRegistrationOtpMutation,
@@ -20,6 +21,7 @@ import AuthLayout from "../layouts/AuthLayout";
 import GoogleSignInButton from "../components/GoogleSignInButton";
 import { isGoogleSignInConfigured } from "../utils/googleClientId";
 import { getApiError } from "../../../shared/utils/errors";
+import AuthInput from "../components/AuthInput";
 
 type RegistrationStep = "details" | "otp";
 
@@ -61,14 +63,7 @@ const Register = () => {
     return () => window.clearTimeout(timer);
   }, [step, resendSeconds]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleOtpChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setOtp(e.target.value.replace(/\D/g, "").slice(0, 6));
-    setOtpError("");
-  };
+  // handleChange removed - using controlled inputs directly
 
   const handleGoogleCredential = async (credential: string) => {
     setGoogleError(null);
@@ -89,6 +84,7 @@ const Register = () => {
 
     const result = registerSchema.safeParse(form);
     if (!result.success) {
+      console.error("Register validation errors:", result.error.issues);
       const fieldErrors: Partial<Record<keyof RegisterFormValues, string>> = {};
       result.error.issues.forEach((issue) => {
         fieldErrors[issue.path[0] as keyof RegisterFormValues] = issue.message;
@@ -221,63 +217,47 @@ const Register = () => {
     setResendSeconds(0);
   };
 
-  const inputClass =
-    "w-full bg-white border border-border rounded-md text-charcoal text-sm " +
-    "px-3 py-2.5 focus:outline-none focus:border-amber transition-colors " +
-    "placeholder:text-muted/70";
-  const errorClass = "text-xs text-ember mt-1";
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [agreeTerms, setAgreeTerms] = useState(false);
 
   if (step === "otp") {
     return (
       <AuthLayout>
-        <p className="font-serif font-bold text-2xl text-charcoal mb-1">Verify your email</p>
-        <p className="text-sm text-muted mb-8">
-          We sent a 6-digit code to{" "}
-          <span className="text-charcoal font-medium">{verificationEmail}</span>.
-        </p>
+        <div className="mb-6 text-center">
+          <h2 className="font-serif text-3xl mb-2 text-cream">Verify your email</h2>
+          <p className="text-sm text-cream/70">{`We sent a 6-digit code to ${verificationEmail}.`}</p>
+        </div>
 
         <form onSubmit={handleVerifyOtp} autoComplete="off" className="space-y-5">
-          <div>
-            <label className="block text-xs text-muted uppercase tracking-wide font-semibold mb-2">
-              Verification code
-            </label>
-            <input
-              name="otp"
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              placeholder="000000"
-              maxLength={6}
-              value={otp}
-              onChange={handleOtpChange}
-              disabled={isVerifyingOtp}
-              autoFocus
-              className={`${inputClass} text-center tracking-[0.5em] text-base`}
-            />
-            {otpError && (
-              <p role="alert" className={errorClass}>
-                {otpError}
-              </p>
-            )}
-          </div>
+          <AuthInput
+            id="otp"
+            label="Verification code"
+            type="text"
+            value={otp}
+            onChange={(v) => {
+              setOtp(v.replace(/\D/g, "").slice(0, 6));
+              setOtpError("");
+            }}
+            placeholder="000000"
+            icon={<Mail size={18} />}
+            error={otpError}
+          />
 
           <button
             type="submit"
             disabled={isVerifyingOtp || otp.length !== 6}
-            className="w-full bg-clay hover:bg-ember transition-colors text-cream
-                       text-xs uppercase tracking-wider font-semibold py-3 rounded-md
-                       disabled:opacity-60"
+            className="w-full rounded-full bg-gradient-to-r from-[var(--color-brown)] to-amber py-3 text-sm uppercase tracking-wide text-cream hover:brightness-110 transition disabled:opacity-60"
           >
             {isVerifyingOtp ? "Verifying..." : "Verify email"}
           </button>
         </form>
 
-        <div className="mt-6 space-y-3">
+        <div className="mt-6 space-y-3 text-center">
           <button
             type="button"
             onClick={handleResendOtp}
             disabled={isResendingOtp || isVerifyingOtp || resendSeconds > 0}
-            className="text-sm text-amber underline underline-offset-2 font-medium
-                       disabled:text-muted disabled:no-underline disabled:cursor-not-allowed"
+            className="text-sm text-amber hover:underline disabled:text-cream/50 disabled:no-underline"
           >
             {isResendingOtp
               ? "Sending new code..."
@@ -286,20 +266,19 @@ const Register = () => {
                 : "Resend code"}
           </button>
 
-          <p className="text-sm text-muted">
+          <p className="text-sm text-cream/80">
             Wrong email?{" "}
             <button
               type="button"
               onClick={handleBackToDetails}
               disabled={isVerifyingOtp}
-              className="text-amber underline underline-offset-2 font-medium
-                         disabled:text-muted disabled:no-underline disabled:cursor-not-allowed"
+              className="text-amber hover:underline disabled:text-cream/50"
             >
               Change details
             </button>
           </p>
 
-          <p className="text-xs text-muted">The code expires in 10 minutes.</p>
+          <p className="text-xs text-cream/60">The code expires in 10 minutes.</p>
         </div>
       </AuthLayout>
     );
@@ -307,121 +286,131 @@ const Register = () => {
 
   return (
     <AuthLayout>
-      <p className="font-serif font-bold text-2xl text-charcoal mb-1">Create an account</p>
-      <p className="text-sm text-muted mb-8">Join DesignFlow to get started.</p>
+      <p className="font-serif text-2xl text-cream mb-1">Create an account</p>
+      <p className="text-sm text-cream/70 mb-5">Join DesignFlow to get started.</p>
 
-      <form onSubmit={handleRequestOtp} autoComplete="off" className="space-y-5">
-        <div>
-          <label className="block text-xs text-muted uppercase tracking-wide font-semibold mb-2">
-            Full name
-          </label>
-          <input
-            name="fullName"
-            placeholder="Jane Doe"
-            value={form.fullName}
-            onChange={handleChange}
-            disabled={isRequestingOtp}
-            className={inputClass}
-          />
-          {errors.fullName && <p className={errorClass}>{errors.fullName}</p>}
-        </div>
+      <form onSubmit={handleRequestOtp} autoComplete="off" className="space-y-3">
+        <AuthInput
+          id="fullName"
+          label="Name"
+          type="text"
+          value={form.fullName}
+          onChange={(v) => {
+            setForm({ ...form, fullName: v });
+            setErrors((prev) => ({ ...prev, fullName: undefined }));
+          }}
+          placeholder="Jane Doe"
+          icon={<User size={18} />}
+          error={errors.fullName}
+          autoComplete="name"
+        />
 
-        <div>
-          <label className="block text-xs text-muted uppercase tracking-wide font-semibold mb-2">
-            Email
-          </label>
-          <input
-            name="email"
-            type="email"
-            placeholder="you@example.com"
-            value={form.email}
-            onChange={handleChange}
-            disabled={isRequestingOtp}
-            className={inputClass}
-          />
-          {errors.email && <p className={errorClass}>{errors.email}</p>}
-        </div>
+        <AuthInput
+          id="email"
+          label="Email"
+          type="email"
+          value={form.email}
+          onChange={(v) => {
+            setForm({ ...form, email: v });
+            setErrors((prev) => ({ ...prev, email: undefined }));
+          }}
+          placeholder="you@example.com"
+          icon={<Mail size={18} />}
+          error={errors.email}
+          autoComplete="email"
+        />
 
-        <div>
-          <label className="block text-xs text-muted uppercase tracking-wide font-semibold mb-2">
-            Phone number
-          </label>
+        <AuthInput
+          id="phone"
+          label="Phone number"
+          type="tel"
+          value={form.phone}
+          onChange={(v) => {
+            setForm({ ...form, phone: v });
+            setErrors((prev) => ({ ...prev, phone: undefined }));
+          }}
+          placeholder="Your phone number"
+          icon={<Phone size={18} />}
+          error={errors.phone}
+          autoComplete="tel"
+        />
 
-          <input
-            name="phone"
-            type="tel"
-            placeholder=""
-            value={form.phone}
-            onChange={handleChange}
-            disabled={isRequestingOtp}
-            className={inputClass}
-          />
+        <AuthInput
+          id="address"
+          label="Address"
+          type="text"
+          value={form.address}
+          onChange={(v) => {
+            setForm({ ...form, address: v });
+            setErrors((prev) => ({ ...prev, address: undefined }));
+          }}
+          placeholder="Your address"
+          icon={<MapPin size={18} />}
+          error={errors.address}
+          autoComplete="street-address"
+        />
 
-          {errors.phone && <p className={errorClass}>{errors.phone}</p>}
-        </div>
-
-        <div>
-          <label className="block text-xs text-muted uppercase tracking-wide font-semibold mb-2">
-            Address
-          </label>
-
-          <input
-            name="address"
-            type="text"
-            placeholder="Your address"
-            value={form.address}
-            onChange={handleChange}
-            disabled={isRequestingOtp}
-            className={inputClass}
-          />
-
-          {errors.address && <p className={errorClass}>{errors.address}</p>}
-        </div>
-
-        <div>
-          <label className="block text-xs text-muted uppercase tracking-wide font-semibold mb-2">
-            Password
-          </label>
-          <input
-            name="password"
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <AuthInput
+            id="password"
+            label="Password"
             type="password"
-            placeholder="Enter your password"
             value={form.password}
-            onChange={handleChange}
-            disabled={isRequestingOtp}
-            className={inputClass}
+            onChange={(v) => {
+              setForm({ ...form, password: v });
+              setErrors((prev) => ({ ...prev, password: undefined }));
+            }}
+            placeholder="Enter password"
+            icon={<Lock size={18} />}
+            error={errors.password}
+            autoComplete="new-password"
           />
-          {errors.password && <p className={errorClass}>{errors.password}</p>}
+
+          <AuthInput
+            id="confirmPassword"
+            label="Confirm password"
+            type="password"
+            value={confirmPassword}
+            onChange={setConfirmPassword}
+            placeholder="Confirm"
+            icon={<Lock size={18} />}
+          />
         </div>
+
+        <label className="flex items-start gap-2 text-sm text-cream/80">
+          <input
+            type="checkbox"
+            checked={agreeTerms}
+            onChange={(e) => setAgreeTerms(e.target.checked)}
+            className="mt-1 rounded border-cream/40 bg-transparent"
+          />
+          I agree to Terms and conditions
+        </label>
 
         {submitError && (
-          <p role="alert" className="text-xs text-ember">
+          <p role="alert" className="text-xs text-red-300">
             {submitError}
           </p>
         )}
 
         <button
           type="submit"
-          disabled={isRequestingOtp || isGooglePending}
-          className="w-full bg-clay hover:bg-ember transition-colors text-cream
-                     text-xs uppercase tracking-wider font-semibold py-3 rounded-md
-                     disabled:opacity-60"
+          disabled={isRequestingOtp || isGooglePending || !agreeTerms}
+          className="w-full rounded-full bg-gradient-to-r from-[var(--color-brown)] to-amber py-2.5 text-sm uppercase tracking-wide text-cream hover:brightness-110 transition disabled:opacity-60"
         >
-          {isRequestingOtp ? "Sending code..." : "Create account"}
+          {isRequestingOtp ? "Sending code..." : "Sign Up"}
         </button>
       </form>
 
       {isGoogleSignInConfigured() && (
-        <div className="mt-6">
+        <div className="mt-4">
           <div className="flex items-center gap-3">
-            <span className="h-px flex-1 bg-border" />
-            <span className="text-[10px] uppercase tracking-[2px] text-muted font-semibold">
-              or
-            </span>
-            <span className="h-px flex-1 bg-border" />
+            <div className="h-px flex-1 bg-cream/20" />
+            <span className="text-xs uppercase tracking-wide text-cream/70">or</span>
+            <div className="h-px flex-1 bg-cream/20" />
           </div>
 
-          <div className="mt-5">
+          <div className="mt-4">
             <GoogleSignInButton
               onCredential={handleGoogleCredential}
               disabled={isRequestingOtp}
@@ -430,7 +419,7 @@ const Register = () => {
           </div>
 
           {googleError && (
-            <p role="alert" className="mt-3 text-center text-xs text-ember">
+            <p role="alert" className="mt-2 text-center text-xs text-red-300">
               {googleError.message}{" "}
               {googleError.action && (
                 <Link
@@ -445,10 +434,10 @@ const Register = () => {
         </div>
       )}
 
-      <p className="text-sm text-muted mt-8">
+      <p className="text-sm text-cream/80 mt-4 text-center">
         Already have an account?{" "}
-        <Link to="/login" className="text-amber underline underline-offset-2 font-medium">
-          Sign in
+        <Link to="/client/login" className="text-amber hover:underline">
+          Login
         </Link>
       </p>
     </AuthLayout>

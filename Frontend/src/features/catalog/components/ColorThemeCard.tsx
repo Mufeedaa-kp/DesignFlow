@@ -1,3 +1,4 @@
+
 import type { IColorTheme } from "../types/catalog.types";
 
 interface ColorThemeCardProps {
@@ -13,17 +14,20 @@ const ColorThemeCard = ({
 }: ColorThemeCardProps) => {
   return (
     <div className="overflow-hidden rounded-lg bg-white shadow-sm">
-      {/* Image */}
-      <div className="h-32 w-full bg-gray-100">
-        {colorTheme.image ? (
-          <img
-            src={colorTheme.image}
-            alt={colorTheme.name}
-            className="h-full w-full object-cover"
-          />
+      {/* Color Palette */}
+      <div className="flex h-32 w-full">
+        {colorTheme.colors?.length > 0 ? (
+          colorTheme.colors.map((color, index) => (
+            <div
+              key={`${color}-${index}`}
+              className="h-full flex-1"
+              style={{ backgroundColor: color }}
+              title={color}
+            />
+          ))
         ) : (
-          <div className="flex h-full items-center justify-center text-xs text-gray-400">
-            No image
+          <div className="flex w-full items-center justify-center bg-gray-100 text-xs text-gray-400">
+            No colors available
           </div>
         )}
       </div>
@@ -33,6 +37,18 @@ const ColorThemeCard = ({
         <h3 className="text-sm font-semibold text-gray-800">
           {colorTheme.name}
         </h3>
+
+        {/* HEX Color Codes */}
+        <div className="mt-2 flex flex-wrap gap-1">
+          {colorTheme.colors?.map((color, index) => (
+            <span
+              key={`${color}-${index}`}
+              className="rounded bg-gray-100 px-1.5 py-1 text-[10px] text-gray-600"
+            >
+              {color}
+            </span>
+          ))}
+        </div>
 
         {/* Actions */}
         <div className="mt-3 flex gap-2">

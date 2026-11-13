@@ -58,187 +58,140 @@ const ProjectRequestReviewPage = ({
   );
 
   return (
-    <>
-      {/* Header */}
-      <div className="mb-5">
-        <h1 className="text-xl font-semibold text-gray-800 sm:text-2xl">
-          Review your project request
-        </h1>
+    <div className="border border-border bg-white p-6 sm:p-8">
+      <h2 className="font-serif text-2xl text-charcoal">
+        Review your project request
+      </h2>
+      <p className="mb-6 mt-1 text-sm text-muted">
+        Review your selections before submitting.
+      </p>
 
-        <p className="mt-1 text-xs leading-5 text-gray-500 sm:text-sm">
-          Review your selections before submitting your project request.
-        </p>
-      </div>
-
-      {/* Progress */}
-      <div className="mb-5 flex flex-wrap items-center gap-2 text-xs sm:text-sm">
-        <span className="text-gray-400">1. Category</span>
-        <span className="text-gray-300">→</span>
-
-        <span className="text-gray-400">2. Design</span>
-        <span className="text-gray-300">→</span>
-
-        <span className="text-gray-400">3. Options</span>
-        <span className="text-gray-300">→</span>
-
-        <span className="text-gray-400">4. Requirements</span>
-        <span className="text-gray-300">→</span>
-
-        <span className="font-medium text-[#8B5E3C]">
-          5. Review
-        </span>
-      </div>
-
-      {/* Loading */}
       {categoriesLoading && (
-        <div className="rounded-xl bg-white p-5 text-center shadow-sm">
-          <p className="text-sm text-gray-500">
-            Loading review details...
-          </p>
+        <div className="bg-panel p-5 text-center text-sm text-muted">
+          Loading review details...
         </div>
       )}
 
-      {/* Error */}
       {categoriesError && (
-        <div className="rounded-xl bg-white p-5 text-center shadow-sm">
-          <p className="text-sm text-red-500">
-            Failed to load category details.
-          </p>
+        <div className="bg-red-50 p-5 text-center text-sm text-red-500">
+          Failed to load category details.
         </div>
       )}
 
       {!categoriesLoading && !categoriesError && (
-        <div className="space-y-4">
+        <div className="space-y-8">
           {/* Project Name */}
-          <section className="rounded-xl bg-white p-4 shadow-sm sm:p-5">
-            <p className="text-[10px] font-medium uppercase tracking-wide text-gray-400">
-              Project Name
+          <section>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-amber">
+              Project name
             </p>
-
-            <h2 className="mt-1 text-lg font-semibold text-gray-800 sm:text-xl">
+            <h3 className="mt-1 font-serif text-2xl text-charcoal">
               {projectName || "Untitled Project"}
-            </h2>
+            </h3>
           </section>
 
-{/* Category & Design */}
-<section className="rounded-xl bg-white p-4 shadow-sm sm:p-5">
-  <h2 className="text-base font-semibold text-gray-800">
-    Category & Design
-  </h2>
+          {/* Category & Design */}
+          <section className="border-t border-border pt-6">
+            <h3 className="mb-4 font-serif text-xl text-charcoal">
+              Category & design
+            </h3>
 
-  <div className="mt-3 grid gap-3 sm:grid-cols-2">
-    {/* Category */}
-    <div className="flex overflow-hidden rounded-lg border border-gray-200">
-      <div className="h-24 w-24 shrink-0 bg-gray-100 sm:h-28 sm:w-28">
-        {category?.image ? (
-          <img
-            src={category.image}
-            alt={category.name}
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center text-[10px] text-gray-400">
-            No image
-          </div>
-        )}
-      </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="flex overflow-hidden border border-border">
+                <div className="h-28 w-28 shrink-0 bg-panel">
+                  {category?.image ? (
+                    <img
+                      src={category.image}
+                      alt={category.name}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-[10px] text-muted">
+                      No image
+                    </div>
+                  )}
+                </div>
+                <div className="min-w-0 p-4">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-amber">
+                    Category
+                  </p>
+                  <h4 className="mt-0.5 truncate font-serif text-base text-charcoal">
+                    {category?.name || "Not selected"}
+                  </h4>
+                  {category?.description && (
+                    <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted">
+                      {category.description}
+                    </p>
+                  )}
+                </div>
+              </div>
 
-      <div className="min-w-0 p-3">
-        <p className="text-[10px] font-medium uppercase tracking-wide text-gray-400">
-          Category
-        </p>
-
-        <h3 className="mt-0.5 truncate text-sm font-semibold text-gray-800">
-          {category?.name || "Not selected"}
-        </h3>
-
-        {category?.description && (
-          <p className="mt-1 line-clamp-2 text-[11px] leading-4 text-gray-500">
-            {category.description}
-          </p>
-        )}
-      </div>
-    </div>
-
-    {/* Catalog Item */}
-    <div className="flex overflow-hidden rounded-lg border border-gray-200">
-      <div className="h-24 w-24 shrink-0 bg-gray-100 sm:h-28 sm:w-28">
-        {catalogItem?.image ? (
-          <img
-            src={catalogItem.image}
-            alt={catalogItem.name}
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center text-[10px] text-gray-400">
-            No image
-          </div>
-        )}
-      </div>
-
-      <div className="min-w-0 p-3">
-        <p className="text-[10px] font-medium uppercase tracking-wide text-gray-400">
-          Design
-        </p>
-
-        <h3 className="mt-0.5 truncate text-sm font-semibold text-gray-800">
-          {catalogItem?.name || "Not selected"}
-        </h3>
-
-        {catalogItem && (
-          <p className="mt-1 text-[11px] text-[#8B5E3C]">
-            Starting from ₹
-            {catalogItem.startingPrice.toLocaleString("en-IN")}
-          </p>
-        )}
-
-        {catalogItem?.description && (
-          <p className="mt-1 line-clamp-2 text-[11px] leading-4 text-gray-500">
-            {catalogItem.description}
-          </p>
-        )}
-      </div>
-    </div>
-  </div>
-</section>
+              <div className="flex overflow-hidden border border-border">
+                <div className="h-28 w-28 shrink-0 bg-panel">
+                  {catalogItem?.image ? (
+                    <img
+                      src={catalogItem.image}
+                      alt={catalogItem.name}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-[10px] text-muted">
+                      No image
+                    </div>
+                  )}
+                </div>
+                <div className="min-w-0 p-4">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-amber">
+                    Design
+                  </p>
+                  <h4 className="mt-0.5 truncate font-serif text-base text-charcoal">
+                    {catalogItem?.name || "Not selected"}
+                  </h4>
+                  {catalogItem && (
+                    <p className="mt-1 text-xs font-semibold text-[var(--color-brown)]">
+                      From ₹{catalogItem.startingPrice.toLocaleString("en-IN")}
+                    </p>
+                  )}
+                  {catalogItem?.description && (
+                    <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted">
+                      {catalogItem.description}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </section>
 
           {/* Materials */}
-          <section className="rounded-xl bg-white p-4 shadow-sm sm:p-5">
-            <h2 className="text-base font-semibold text-gray-800">
-              Materials
-            </h2>
+          <section className="border-t border-border pt-6">
+            <h3 className="mb-4 font-serif text-xl text-charcoal">Materials</h3>
 
             {materials.length === 0 ? (
-              <p className="mt-3 text-xs text-gray-500">
-                No materials selected.
-              </p>
+              <p className="text-sm text-muted">No materials selected.</p>
             ) : (
-              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                 {materials.map((material) => (
                   <div
                     key={material._id}
-                    className="flex min-w-0 items-center gap-2 rounded-lg border border-gray-200 p-2"
+                    className="flex min-w-0 items-center gap-3 border border-border p-2"
                   >
-                    <div className="h-10 w-10 shrink-0 overflow-hidden rounded-md bg-gray-100">
-                      {material.images?.[0] ? (
+                    <div className="h-12 w-12 shrink-0 overflow-hidden bg-panel">
+                      {material.images?.[0] && (
                         <img
                           src={material.images[0]}
                           alt={material.name}
                           className="h-full w-full object-cover"
                         />
-                      ) : null}
+                      )}
                     </div>
-
                     <div className="min-w-0">
-                      <p className="truncate text-[11px] font-semibold text-gray-800">
+                      <p className="truncate text-xs font-semibold text-charcoal">
                         {material.name}
                       </p>
-
-                      <p className="truncate text-[9px] text-gray-500">
+                      <p className="truncate text-[10px] text-muted">
                         {material.type}
                       </p>
-
-                      <p className="text-[10px] font-medium text-[#8B5E3C]">
+                      <p className="text-[11px] font-semibold text-[var(--color-brown)]">
                         ₹{material.price.toLocaleString("en-IN")}
                       </p>
                     </div>
@@ -248,111 +201,91 @@ const ProjectRequestReviewPage = ({
             )}
           </section>
 
-          {/* Color Themes */}
-          <section className="rounded-xl bg-white p-4 shadow-sm sm:p-5">
-            <h2 className="text-base font-semibold text-gray-800">
-              Color Themes
-            </h2>
 
-            {colorThemes.length === 0 ? (
-              <p className="mt-3 text-xs text-gray-500">
-                No color themes selected.
-              </p>
-            ) : (
-              <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10">
-                {colorThemes.map((colorTheme) => (
-                  <div
-                    key={colorTheme._id}
-                    className="overflow-hidden rounded-lg border border-gray-200"
-                  >
-                    <div className="aspect-square bg-gray-100">
-                      {colorTheme.image ? (
-                        <img
-                          src={colorTheme.image}
-                          alt={colorTheme.name}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : null}
-                    </div>
+{/* Color Themes */}
+<section className="border-t border-border pt-6">
+  <h3 className="mb-4 font-serif text-xl text-charcoal">
+    Color themes
+  </h3>
 
-                    <div className="p-1.5">
-                      <p className="truncate text-[10px] font-medium text-gray-800">
-                        {colorTheme.name}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
+  {colorThemes.length === 0 ? (
+    <p className="text-sm text-muted">
+      No color themes selected.
+    </p>
+  ) : (
+    <div className="grid grid-cols-4 gap-3 sm:grid-cols-6 lg:grid-cols-8">
+      {colorThemes.map((colorTheme) => (
+        <div key={colorTheme._id} className="border border-border">
+          <div className="grid aspect-square grid-cols-2 bg-panel">
+            {colorTheme.colors.map((color, index) => (
+              <div
+                key={`${color}-${index}`}
+                style={{ backgroundColor: color }}
+                title={color}
+              />
+            ))}
+          </div>
+
+          <p className="truncate p-1.5 text-[11px] font-medium text-charcoal">
+            {colorTheme.name}
+          </p>
+        </div>
+      ))}
+    </div>
+  )}
+</section>
+
 
           {/* Measurements */}
-          <section className="rounded-xl bg-white p-4 shadow-sm sm:p-5">
-            <h2 className="text-base font-semibold text-gray-800">
+          <section className="border-t border-border pt-6">
+            <h3 className="mb-4 font-serif text-xl text-charcoal">
               Measurements
-            </h2>
+            </h3>
 
-            <div className="mt-3 grid grid-cols-3 gap-2">
-              <div className="rounded-lg bg-[#F8F6F2] p-3">
-                <p className="text-[10px] text-gray-400">
-                  Height
-                </p>
-
-                <p className="mt-0.5 text-sm font-semibold text-gray-800">
-                  {measurements.height} ft
-                </p>
-              </div>
-
-              <div className="rounded-lg bg-[#F8F6F2] p-3">
-                <p className="text-[10px] text-gray-400">
-                  Width
-                </p>
-
-                <p className="mt-0.5 text-sm font-semibold text-gray-800">
-                  {measurements.width} ft
-                </p>
-              </div>
-
-              <div className="rounded-lg bg-[#F8F6F2] p-3">
-                <p className="text-[10px] text-gray-400">
-                  Area
-                </p>
-
-                <p className="mt-0.5 text-sm font-semibold text-gray-800">
-                  {measurements.squareFeet} sq. ft.
-                </p>
-              </div>
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { label: "Height", value: `${measurements.height} ft` },
+                { label: "Width", value: `${measurements.width} ft` },
+                { label: "Area", value: `${measurements.squareFeet} sq. ft.` },
+              ].map((item) => (
+                <div key={item.label} className="bg-panel p-4">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted">
+                    {item.label}
+                  </p>
+                  <p className="mt-1 font-serif text-lg text-charcoal">
+                    {item.value}
+                  </p>
+                </div>
+              ))}
             </div>
           </section>
 
           {/* Requirements */}
-          <section className="rounded-xl bg-white p-4 shadow-sm sm:p-5">
-            <h2 className="text-base font-semibold text-gray-800">
+          <section className="border-t border-border pt-6">
+            <h3 className="mb-3 font-serif text-xl text-charcoal">
               Requirements
-            </h2>
-
-            <p className="mt-3 whitespace-pre-wrap text-xs leading-5 text-gray-600 sm:text-sm">
+            </h3>
+            <p className="whitespace-pre-wrap text-sm leading-6 text-muted">
               {description || "No description provided."}
             </p>
           </section>
 
           {/* Reference Images */}
           {referenceImages.length > 0 && (
-            <section className="rounded-xl bg-white p-4 shadow-sm sm:p-5">
-              <h2 className="text-base font-semibold text-gray-800">
-                Reference Images
-              </h2>
-
-              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+            <section className="border-t border-border pt-6">
+              <h3 className="mb-4 font-serif text-xl text-charcoal">
+                Reference images
+              </h3>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
                 {referenceImages.map((image, index) => (
                   <div
                     key={`${image}-${index}`}
-                    className="overflow-hidden rounded-lg border border-gray-200"
+                    className="overflow-hidden border border-border"
                   >
                     <img
                       src={image}
                       alt={`Reference ${index + 1}`}
-                      className="aspect-4/3 w-full object-cover"
+                      className="aspect-[4/3] w-full object-cover"
                     />
                   </div>
                 ))}
@@ -361,58 +294,52 @@ const ProjectRequestReviewPage = ({
           )}
 
           {/* Need By */}
-          <section className="rounded-xl bg-white p-4 shadow-sm sm:p-5">
-            <h2 className="text-base font-semibold text-gray-800">
-              Preferred Completion Date
-            </h2>
-
-            <p className="mt-2 text-xs text-gray-600 sm:text-sm">
+          <section className="border-t border-border pt-6">
+            <h3 className="mb-3 font-serif text-xl text-charcoal">
+              Preferred completion date
+            </h3>
+            <p className="text-sm text-muted">
               {needBy || "No preferred date provided."}
             </p>
           </section>
 
           {/* Estimated Total */}
-          <section className="rounded-xl border border-[#D9C7A3] bg-[#F8F6F2] p-4 sm:p-5">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-xs font-medium text-gray-500">
-                  Estimated Total
-                </p>
-
-                <p className="mt-0.5 max-w-xl text-[10px] leading-4 text-gray-400 sm:text-xs">
-                  Final pricing may change after detailed measurement and
-                  design consultation.
-                </p>
-              </div>
-
-              <p className="text-xl font-semibold text-[#8B5E3C]">
-                ₹{estimatedTotal.toLocaleString("en-IN")}
+          <section className="flex flex-col gap-2 border border-[var(--color-brown)] bg-panel p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-muted">
+                Estimated total
+              </p>
+              <p className="mt-1 max-w-xl text-xs leading-5 text-muted">
+                Final pricing may change after detailed measurement and design
+                consultation.
               </p>
             </div>
+            <p className="font-serif text-3xl text-[var(--color-brown)]">
+              ₹{estimatedTotal.toLocaleString("en-IN")}
+            </p>
           </section>
 
           {/* Navigation */}
-          <div className="flex flex-col-reverse gap-3 border-t border-gray-100 pt-6 sm:flex-row sm:justify-between">
+          <div className="flex flex-col-reverse gap-3 border-t border-border pt-6 sm:flex-row sm:justify-between">
             <button
               type="button"
               onClick={onBack}
-              className="rounded-lg border border-gray-300 px-6 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+              className="border border-border px-8 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-charcoal transition hover:bg-panel"
             >
               Back
             </button>
-
             <button
               type="button"
               onClick={onSubmit}
               disabled={isSubmitting}
-              className="w-full rounded-lg bg-[#8B5E3C] px-6 py-3 font-medium text-white transition hover:bg-[#70482F] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+              className="border border-[var(--color-brown)] bg-[var(--color-brown)] px-8 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-cream transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isSubmitting ? "Submitting..." : "Submit Request"}
             </button>
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 

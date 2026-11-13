@@ -5,6 +5,7 @@ import SearchBar from "./SearchBar";
 import NotificationButton from "./NotificationButton";
 import ProfileMenu from "./ProfileMenu";
 import { useUnreadNotificationCount } from "../../features/notifications/hooks/useNotifications";
+import { useAppSelector } from "../../store/hooks";
 
 
 interface NavBarLink {
@@ -34,6 +35,14 @@ const NavBar = ({
   useUnreadNotificationCount();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const user = useAppSelector((state) => state.auth.user);
+
+  const notificationPath =
+    user?.role === "admin"
+      ? "/admin/notifications"
+      : user?.role === "designer"
+        ? "/designer/notifications"
+        : "/client/notifications";
 
   const isQuotationPage =
     location.pathname.includes("/quotation");
@@ -109,6 +118,7 @@ const NavBar = ({
 
           <NotificationButton
             unreadCount={unreadCount}
+            to={notificationPath}
           />
 
           <ProfileMenu />

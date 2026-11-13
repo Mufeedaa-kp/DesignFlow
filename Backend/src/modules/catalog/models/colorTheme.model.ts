@@ -1,8 +1,9 @@
-import mongoose, { Document, Schema } from "mongoose";
+
+import mongoose, { Schema, Document } from "mongoose";
 
 export interface IColorTheme extends Document {
   name: string;
-  image: string;
+  colors: string[];
   isActive: boolean;
 }
 
@@ -14,20 +15,22 @@ const colorThemeSchema = new Schema<IColorTheme>(
       unique: true,
       trim: true,
     },
-
-    image: {
-      type: String,
+    colors: {
+      type: [String],
       required: true,
+      validate: {
+        validator: (colors: string[]) =>
+          colors.length >= 2 &&
+          colors.every((color) => /^#[0-9A-Fa-f]{6}$/.test(color)),
+        message: "Provide at least two valid HEX colors.",
+      },
     },
-
     isActive: {
       type: Boolean,
       default: true,
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
 const ColorTheme = mongoose.model<IColorTheme>(

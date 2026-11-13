@@ -1,20 +1,29 @@
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { Notification } from "./notification.model";
 import { CreateNotificationInput } from "./notification.types";
 import { sendSSEToUser } from "./notification.sse";
+import { ApiError } from "../../utils/ApiError";
 
 export const createNotificationService = async (
   data: CreateNotificationInput
 ) => {
   const notification = await Notification.create(data);
 
-sendSSEToUser(
-  data.recipient.toString(),
-  {
-    type: "NOTIFICATION",
-    notification,
+  if (notification.project) {
+    try {
+      await notification.populate("project", "projectName");
+    } catch {
+      // project may be missing/unresolvable; do not fail notification creation
+    }
   }
-);
+
+  sendSSEToUser(
+    data.recipient.toString(),
+    {
+      type: "NOTIFICATION",
+      notification,
+    }
+  );
 
   return notification;
 };
@@ -64,7 +73,14 @@ export const markNotificationAsReadService = async (
   notificationId: string,
   userId: string
 ) => {
-  return Notification.findOneAndUpdate(
+  if (!mongoose.isValidObjectId(notificationId)) {
+    throw new ApiError(
+      400,
+      "Invalid notification ID"
+    );
+  }
+
+  const notification = await Notification.findOneAndUpdate(
     {
       _id: notificationId,
       recipient: new Types.ObjectId(userId),
@@ -76,6 +92,15 @@ export const markNotificationAsReadService = async (
       new: true,
     }
   );
+
+  if (!notification) {
+    throw new ApiError(
+      404,
+      "Notification not found"
+    );
+  }
+
+  return notification;
 };
 
 export const markAllNotificationsAsReadService = async (

@@ -10,74 +10,58 @@ const CategorySelector = ({
   categories,
   selectedCategoryId,
   onSelect,
-}: CategorySelectorProps) => {
-  return (
-    <div>
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold text-gray-800">
-          What would you like to design?
-        </h2>
+}: CategorySelectorProps) => (
+  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    {categories.map((category) => {
+      const isSelected = selectedCategoryId === category._id;
 
-        <p className="mt-2 text-sm text-gray-500">
-          Choose a category to continue with your project request.
-        </p>
-      </div>
-
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {categories.map((category) => {
-          const isSelected =
-            selectedCategoryId === category._id;
-
-          return (
-            <button
-              key={category._id}
-              type="button"
-              onClick={() => onSelect(category._id)}
-              className={`overflow-hidden rounded-2xl border bg-white text-left transition ${
-                isSelected
-                  ? "border-[#8B5E3C] ring-2 ring-[#D9C7A3]"
-                  : "border-gray-200 hover:border-[#D9C7A3] hover:shadow-md"
-              }`}
-            >
-              {/* Image */}
-              <div className="h-52 w-full bg-gray-100">
-                {category.image ? (
-                  <img
-                    src={category.image}
-                    alt={category.name}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-sm text-gray-400">
-                    No image
-                  </div>
-                )}
+      return (
+        <button
+          key={category._id}
+          type="button"
+          onClick={() => onSelect(category._id)}
+          aria-pressed={isSelected}
+          className={`group relative overflow-hidden border bg-white text-left transition ${
+            isSelected
+              ? "border-[var(--color-brown)] ring-1 ring-[var(--color-brown)]"
+              : "border-border hover:border-[var(--color-brown)] hover:shadow-md"
+          }`}
+        >
+          <div className="relative aspect-[4/3] w-full overflow-hidden bg-panel">
+            {category.image ? (
+              <img
+                src={category.image}
+                alt={category.name}
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+            ) : (
+              <div className="flex h-full items-center justify-center bg-[var(--color-brown-dark)] font-serif text-cream">
+                DesignFlow
               </div>
+            )}
 
-              {/* Details */}
-              <div className="p-5">
-                <div className="flex items-start justify-between gap-3">
-                  <h3 className="text-lg font-semibold text-gray-800">
-                    {category.name}
-                  </h3>
+            {isSelected && (
+              <span className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center bg-[var(--color-brown)] text-sm font-bold text-cream">
+                ✓
+              </span>
+            )}
+          </div>
 
-                  {isSelected && (
-                    <span className="rounded-full bg-[#8B5E3C] px-3 py-1 text-xs font-medium text-white">
-                      Selected
-                    </span>
-                  )}
-                </div>
-
-                <p className="mt-2 line-clamp-3 text-sm leading-6 text-gray-500">
-                  {category.description}
-                </p>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
+          <div className="p-5">
+            <h3 className="font-serif text-xl text-charcoal">
+              {category.name}
+            </h3>
+            <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted">
+              {category.description}
+            </p>
+            <span className="mt-4 inline-block border-b border-[var(--color-brown)] pb-0.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-[var(--color-brown)]">
+              {isSelected ? "Selected" : "Select"}
+            </span>
+          </div>
+        </button>
+      );
+    })}
+  </div>
+);
 
 export default CategorySelector;

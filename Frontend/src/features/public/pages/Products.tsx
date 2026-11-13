@@ -1,33 +1,30 @@
 import { Link } from "react-router-dom";
 import { PRODUCT_CATEGORIES } from "./productCategories";
+import HeroBanner from "./HeroBanner";
 
 const Products = () => (
   <div>
-    <section className="py-24">
-      <div className="max-w-6xl mx-auto px-6 sm:px-10">
+    <HeroBanner
+      label="Products"
+      quote={"What we design\nand build"}
+      image="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=2000&q=85"
+    />
 
-        <div className="max-w-xl mb-14">
-          <span className="block text-xs uppercase tracking-[0.28em] text-clay mb-4">
-            Products
-          </span>
-
-          <h1 className="font-serif text-4xl text-charcoal leading-tight">
-            What we design and build
-          </h1>
-        </div>
-
+    <section className="section">
+      <div className="container-page">
 
         <div className="grid md:grid-cols-3 gap-6">
-          {PRODUCT_CATEGORIES.map((cat) => (
+          {PRODUCT_CATEGORIES.map((cat, idx) => (
             <Link
               key={cat.slug}
               to={`/products/${cat.slug}`}
-              className="group block border border-border bg-surface"
+              className="reveal-on-scroll group block border border-border bg-surface"
+              style={{ "--reveal-delay": `${0.12 + idx * 0.08}s` } as React.CSSProperties}
             >
 
               {/* Category Image */}
 
-              <div className="aspect-4/5 overflow-hidden bg-linear-to-br from-panel to-surface">
+              <div className="aspect-[7/8] overflow-hidden bg-linear-to-br from-panel to-surface">
                 {cat.image ? (
                   <img
                     src={cat.image}
@@ -35,7 +32,7 @@ const Products = () => (
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 ) : (
-                  <div className="w-full h-full bg-linear-to-br from-panel to-surface" />
+                  <div className="w-full h-full bg-[var(--color-brown-dark)]" />
                 )}
               </div>
 

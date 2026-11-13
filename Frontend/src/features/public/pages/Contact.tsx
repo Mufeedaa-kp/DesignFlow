@@ -68,7 +68,7 @@ const onSubmit = async (data: ContactFormData) => {
         image="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=2000&q=85"
       />
 
-      <section className="py-24">
+      <section className="section-fullscreen">
         <div className="max-w-6xl mx-auto px-6 sm:px-10 grid lg:grid-cols-[1fr_1.4fr] gap-16">
 
           {/* Contact Information */}
