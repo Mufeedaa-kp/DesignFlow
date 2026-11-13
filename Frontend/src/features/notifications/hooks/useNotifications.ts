@@ -4,6 +4,8 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 
+import { useAppSelector } from "../../../store/hooks";
+
 import {
   getMyNotifications,
   getUnreadNotificationCount,
@@ -22,24 +24,37 @@ export const notificationKeys = {
     [...notificationKeys.all, "unread-count"] as const,
 };
 
+// True when the user has a login token (same sources as NotificationContext)
+const useHasAuthToken = () => {
+  const reduxToken = useAppSelector((state) => state.auth.token);
+
+  return !!(localStorage.getItem("designflow_token") ?? reduxToken);
+};
+
 // Get notifications
 export const useNotifications = (
   page = 1,
   limit = 10
 ) => {
+  const hasToken = useHasAuthToken();
+
   return useQuery({
     queryKey: notificationKeys.list(page, limit),
     queryFn: () =>
       getMyNotifications(page, limit),
+    enabled: hasToken,
   });
 };
 
 // Get unread notification count
 export const useUnreadNotificationCount = () => {
+  const hasToken = useHasAuthToken();
+
   return useQuery({
     queryKey:
       notificationKeys.unreadCount(),
     queryFn: getUnreadNotificationCount,
+    enabled: hasToken,
   });
 };
 
