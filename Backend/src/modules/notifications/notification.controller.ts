@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import {
   getUserNotificationsService,
   getUnreadNotificationCountService,
@@ -54,22 +54,27 @@ export const getUnreadNotificationCount = async (
 
 export const markNotificationAsRead = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
-  const userId = req.user.id;
+  try {
+    const userId = req.user.id;
 
-  const notification = await markNotificationAsReadService(
-    req.params.id as string,
-    userId.toString()
-  );
+    const notification = await markNotificationAsReadService(
+      req.params.id as string,
+      userId.toString()
+    );
 
-  return res.status(200).json(
-    new ApiResponse(
-      200,
-      "Notification marked as read",
-      notification,
-    )
-  );
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        "Notification marked as read",
+        notification,
+      )
+    );
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const markAllNotificationsAsRead = async (

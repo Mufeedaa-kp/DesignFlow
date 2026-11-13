@@ -1,5 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
-import { loginUser, registerUser } from "../services/auth.service";
+import {
+  googleLogin,
+  loginUser,
+  requestRegistrationOtp,
+  resendRegistrationOtp,
+  verifyRegistrationOtp,
+} from "../services/auth.service";
 import type { LoginFormValues, RegisterFormValues } from "../schema/auth.schema";
 
 export const useLoginMutation = () => {
@@ -9,8 +15,27 @@ export const useLoginMutation = () => {
   });
 };
 
-export const useRegisterMutation = () => {
+export const useGoogleAuthMutation = () => {
   return useMutation({
-    mutationFn: (values: RegisterFormValues) => registerUser(values),
+    mutationFn: (credential: string) => googleLogin(credential),
+  });
+};
+
+export const useRequestRegistrationOtpMutation = () => {
+  return useMutation({
+    mutationFn: (values: RegisterFormValues) => requestRegistrationOtp(values),
+  });
+};
+
+export const useResendRegistrationOtpMutation = () => {
+  return useMutation({
+    mutationFn: (email: string) => resendRegistrationOtp(email),
+  });
+};
+
+export const useVerifyRegistrationOtpMutation = () => {
+  return useMutation({
+    mutationFn: (values: { email: string; otp: string }) =>
+      verifyRegistrationOtp(values),
   });
 };

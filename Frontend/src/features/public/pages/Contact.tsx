@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import HeroBanner from "./HeroBanner";
 import api from "../../../services/api";
 import toast from "react-hot-toast";
+import { getErrorMessage } from "../../../shared/utils/errors";
 
 const contactSchema = z.object({
   name: z
@@ -55,12 +56,7 @@ const onSubmit = async (data: ContactFormData) => {
 
     reset();
   } catch (error: unknown) {
-    const message =
-      error instanceof Error
-        ? error.message
-        : "Failed to send your message";
-
-    toast.error(message);
+    toast.error(getErrorMessage(error));
   }
 };
 
@@ -72,7 +68,7 @@ const onSubmit = async (data: ContactFormData) => {
         image="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=2000&q=85"
       />
 
-      <section className="py-24">
+      <section className="section-fullscreen">
         <div className="max-w-6xl mx-auto px-6 sm:px-10 grid lg:grid-cols-[1fr_1.4fr] gap-16">
 
           {/* Contact Information */}

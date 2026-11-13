@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 const PublicFooter = () => {
   return (
-    <footer className="bg-charcoal text-cream/80">
+    <footer className="bg-[var(--color-brown-dark)] text-cream/80">
       <div className="mx-auto grid max-w-6xl grid-cols-2 gap-10 border-b border-cream/10 px-6 py-16 sm:px-10 md:grid-cols-4">
         <div className="col-span-2 md:col-span-1">
           <p className="mb-4 font-serif text-xl text-cream">

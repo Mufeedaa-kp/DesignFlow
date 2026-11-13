@@ -61,7 +61,7 @@ const QuotationForm = ({
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-1 block text-xs font-medium text-[#6B5A4A]">
+          <label className="mb-1 block text-xs font-medium text-muted">
             Discount
           </label>
 
@@ -71,19 +71,19 @@ const QuotationForm = ({
             {...register("discount", {
               valueAsNumber: true,
             })}
-            className="w-full rounded-md border border-[#D9C7A3] px-3 py-2 text-sm outline-none focus:border-[#8B5E3C]"
+            className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-charcoal outline-none focus:border-amber"
             placeholder="0"
           />
 
           {errors.discount && (
-            <p className="mt-1 text-xs text-red-500">
+            <p className="mt-1 text-xs text-ember">
               {errors.discount.message}
             </p>
           )}
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-[#6B5A4A]">
+          <label className="mb-1 block text-xs font-medium text-muted">
             Tax
           </label>
 
@@ -93,12 +93,12 @@ const QuotationForm = ({
             {...register("tax", {
               valueAsNumber: true,
             })}
-            className="w-full rounded-md border border-[#D9C7A3] px-3 py-2 text-sm outline-none focus:border-[#8B5E3C]"
+            className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-charcoal outline-none focus:border-amber"
             placeholder="0"
           />
 
           {errors.tax && (
-            <p className="mt-1 text-xs text-red-500">
+            <p className="mt-1 text-xs text-ember">
               {errors.tax.message}
             </p>
           )}
@@ -106,7 +106,7 @@ const QuotationForm = ({
       </div>
 
       <div>
-        <label className="mb-1 block text-xs font-medium text-[#6B5A4A]">
+        <label className="mb-1 block text-xs font-medium text-muted">
           Notes
         </label>
 
@@ -114,10 +114,10 @@ const QuotationForm = ({
           {...register("notes")}
           rows={4}
           placeholder="Add any additional notes..."
-          className="w-full resize-none rounded-md border border-[#D9C7A3] px-3 py-2 text-sm outline-none focus:border-[#8B5E3C]"
+          className="w-full resize-none rounded-md border border-border bg-surface px-3 py-2 text-sm text-charcoal outline-none focus:border-amber"
         />
         {errors.notes && (
-          <p className="mt-1 text-xs text-red-500">
+          <p className="mt-1 text-xs text-ember">
             {errors.notes.message}
           </p>
         )}
@@ -127,7 +127,7 @@ const QuotationForm = ({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="rounded-md bg-[#8B5E3C] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[#754B31] disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded-md bg-clay px-5 py-2.5 text-sm font-medium text-cream transition hover:bg-ember disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isSubmitting
             ? "Saving..."

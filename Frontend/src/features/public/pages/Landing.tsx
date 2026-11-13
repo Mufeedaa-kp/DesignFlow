@@ -32,7 +32,7 @@ const WHAT_WE_DO = [
     title: "Modular Kitchen",
     text: "Straight, L-shaped, and island layouts tailored to how you actually cook and gather.",
     image:
-      "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=900&q=80",
+      "https://res.cloudinary.com/zmpym9nr/image/upload/v1793077913/kit.jpg",
     to: "/products/modular-kitchen",
   },
   {
@@ -40,7 +40,7 @@ const WHAT_WE_DO = [
     title: "Furniture",
     text: "Custom, handcrafted pieces built to fit your space, your style, and your budget.",
     image:
-      "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=900&q=80",
+      "https://res.cloudinary.com/zmpym9nr/image/upload/v1793076687/Space-Saving_Modern_Wood_Shelf_Ideas_for_a_Stylish_Home.jpg",
     to: "/products/furniture",
   },
   {
@@ -48,7 +48,7 @@ const WHAT_WE_DO = [
     title: "Wardrobe",
     text: "Walk-ins and fitted wardrobes designed around how you actually store and dress.",
     image:
-      "https://images.unsplash.com/photo-1595428774223-ef52624120d2?auto=format&fit=crop&w=900&q=80",
+      "https://res.cloudinary.com/zmpym9nr/image/upload/v1793016144/WhatsApp_Image_2026-10-26_at_1.01.14_PM_4.jpg",
     to: "/products/wardrobe",
   },
 ];
@@ -128,25 +128,31 @@ const PORTFOLIO = [
     tag: "Modular Kitchen",
     title: "The Hollis Residence",
     image:
-      "https://images.unsplash.com/photo-1600566753051-f0b89df2dd90?auto=format&fit=crop&w=900&q=80",
+      "https://res.cloudinary.com/zmpym9nr/image/upload/v1793094124/WhatsApp_Image_2026-10-27_at_3.10.41_PM.jpg",
   },
   {
     tag: "Furniture",
     title: "Marlow Living Room",
     image:
-      "https://images.unsplash.com/photo-1618220179428-22790b461013?auto=format&fit=crop&w=900&q=80",
+      "https://res.cloudinary.com/zmpym9nr/image/upload/v1793097290/WhatsApp_Image_2026-10-27_at_4.01.53_PM_5.jpg",
   },
   {
     tag: "Wardrobe",
     title: "Aster Walk-in",
     image:
-      "https://images.unsplash.com/photo-1558997519-83ea9252edf8?auto=format&fit=crop&w=900&q=80",
+      "https://res.cloudinary.com/zmpym9nr/image/upload/v1793016166/WhatsApp_Image_2026-10-26_at_1.01.14_PM.jpg",
   },
   {
     tag: "Modular Kitchen",
     title: "The Cedar Loft",
     image:
-      "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=900&q=80",
+      "https://res.cloudinary.com/zmpym9nr/image/upload/v1793094123/WhatsApp_Image_2026-10-27_at_3.10.42_PM_1.jpg",
+  },
+  {
+    tag: "Bedroom",
+    title: "Master Bedroom",
+    image:
+      "https://res.cloudinary.com/zmpym9nr/image/upload/v1793094124/WhatsApp_Image_2026-10-27_at_3.10.41_PM.jpg",
   },
 ];
 
@@ -245,7 +251,7 @@ const Landing = () => {
   return (
     <div>
       {/* ---------- HERO ---------- */}
-      <section className="relative h-[85vh] min-h- 162.5 overflow-hidden">
+      <section className="hero-fullscreen relative overflow-hidden">
         {HERO_SLIDES.map((slide, i) => (
           <div
             key={slide.label}
@@ -258,12 +264,11 @@ const Landing = () => {
             <img
               src={slide.image}
               alt={slide.label}
-              className="absolute inset-0 h-full w-full object-cover"
+              className="hero-fullscreen-img hero-zoom"
+
             />
 
-            <div className="absolute inset-0 bg-charcoal/45" />
-
-            <div className="absolute inset-0 bg-linear-to-t from-charcoal/80 via-charcoal/20 to-charcoal/40" />
+            <div className="hero-fullscreen-overlay" />
 
             <span className="absolute bottom-6 right-8 text-[10px] uppercase tracking-[0.2em] text-cream/50">
               {slide.label} —{" "}
@@ -272,36 +277,37 @@ const Landing = () => {
           </div>
         ))}
 
-        <div className="relative z-10 mx-auto flex h-full max-w-6xl items-center px-6 sm:px-10">
-          <div>
-            <span className="mb-5 block text-xs uppercase tracking-[0.28em] text-amber">
+        <div className="relative z-10 container-page flex flex-col items-start justify-center pt-[calc(var(--navbar-height)+2rem)] pb-[clamp(4rem,8vh,6rem)]">
+          <div className="max-w-3xl">
+            <span className="fade-up mb-5 block text-xs uppercase tracking-[0.28em] text-[#f5e7d3]" style={{ animationDelay: "0.1s", textShadow: "0 1px 8px rgba(0,0,0,0.4)" }}>
               Interior Design Studio
             </span>
 
-            <h1 className="max-w-2xl font-serif text-5xl leading-[1.04] text-cream sm:text-6xl lg:text-7xl">
-              Create your own{" "}
-              <em className="italic text-amber">
-                comfort
-              </em>
-              , designed around you
+            <h1 className="hero-heading">
+              <span className="text-reveal-mask">
+                <span className="text-reveal-line" style={{ animationDelay: "0.25s" }}>
+                  Create your own{" "}
+                  <em className="italic text-amber">
+                    comfort
+                  </em>
+                  , designed around you
+                </span>
+              </span>
             </h1>
 
-            <p className="mt-6 max-w-md text-sm leading-relaxed text-cream/70 sm:text-base">
-              From first sketch to final install —
-              DesignFlow brings your project, your
-              designer, and every decision together
-              in one place.
+            <p className="hero-paragraph fade-up mt-6" style={{ animationDelay: "0.7s" }}>
+              From first sketch to final install — DesignFlow brings your project, your designer, and every decision together in one place.
             </p>
 
-            <div className="mt-9 flex flex-wrap gap-4">
+            <div className="fade-up mt-8 flex flex-wrap gap-4" style={{ animationDelay: "0.9s" }}>
               <Link to={user ? "/client/requests/new" : "/register"}
-                className="bg-amber px-8 py-4 text-xs uppercase tracking-widest text-charcoal transition-colors hover:bg-cream">
-  Start a Project
-</Link>
+                className="border border-cream px-8 py-4 text-xs uppercase tracking-widest text-cream transition-colors hover:bg-[var(--color-brown)] hover:border-[var(--color-brown)] hover:text-cream w-full sm:w-auto text-center">
+                Start a Project
+              </Link>
 
               <Link
                 to="/products"
-                className="border border-cream/40 px-8 py-4 text-xs uppercase tracking-widest text-cream transition-colors hover:border-cream"
+                className="border border-cream px-8 py-4 text-xs uppercase tracking-widest text-cream transition-colors hover:bg-[var(--color-brown)] hover:border-[var(--color-brown)] hover:text-cream w-full sm:w-auto text-center"
               >
                 View Our Work
               </Link>
@@ -309,7 +315,7 @@ const Landing = () => {
           </div>
         </div>
 
-        <div className="absolute bottom-8 left-0 right-0 z-10 flex justify-center gap-2.5">
+        <div className="absolute bottom-6 left-0 right-0 z-10 flex justify-center gap-2.5">
           {HERO_SLIDES.map((slide, i) => (
             <button
               key={slide.label}
@@ -328,12 +334,12 @@ const Landing = () => {
 
       
       <section className="bg-panel/40">
-        <div className="mx-auto grid max-w-6xl items-center gap-14 px-6 py-24 sm:px-10 md:grid-cols-2">
-          <div className="aspect-4/5 overflow-hidden border border-border">
+        <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-12 sm:px-10 md:grid-cols-2 lg:py-14">
+          <div className="overflow-hidden border border-border aspect-[4/3] max-h-[50svh] lg:aspect-auto lg:h-[clamp(320px,calc(100svh-var(--navbar-height)-8rem),560px)] lg:max-h-none">
             <img
-              src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=900&q=80"
+              src="https://res.cloudinary.com/zmpym9nr/image/upload/v1793016136/WhatsApp_Image_2026-10-26_at_1.01.14_PM_1.jpg"
               alt="DesignFlow interior"
-              className="h-full w-full object-cover"
+              className="h-full w-full object-cover object-center"
             />
           </div>
 
@@ -657,7 +663,7 @@ const Landing = () => {
           </div>
 
           <Link
-            to="/register"
+            to={user?.role === "client" ? "/client/requests/new" : "/register"}
             className="shrink-0 bg-amber px-7 py-3.5 text-xs uppercase tracking-wider text-charcoal transition-colors hover:bg-cream"
           >
             Start Your Project

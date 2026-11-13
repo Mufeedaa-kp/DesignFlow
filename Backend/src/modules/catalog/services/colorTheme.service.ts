@@ -1,28 +1,30 @@
+
 import ColorTheme from "../models/colorTheme.model";
 import { ApiError } from "../../../utils/ApiError";
 
 interface CreateColorThemeData {
   name: string;
-  image: string;
+  colors: string[];
 }
 
 interface UpdateColorThemeData {
   name?: string;
-  image?: string;
+  colors?: string[];
+  isActive?: boolean;
 }
 
 export const createColorTheme = async (
   data: CreateColorThemeData
 ) => {
-  const existingColorTheme =
-    await ColorTheme.findOne({
-      name: data.name,
-    });
+  const existingColorTheme = await ColorTheme.findOne({
+    name: data.name,
+  });
 
   if (existingColorTheme) {
     throw new ApiError(
       409,
-      "Color theme already exists"
+      "Color theme already exists",
+      "COLOR_THEME_EXISTS"
     );
   }
 
@@ -37,9 +39,7 @@ export const getColorThemes = async (
 
   const [colorThemes, total] = await Promise.all([
     ColorTheme.find()
-      .sort({
-        name: 1,
-      })
+      .sort({ name: 1 })
       .skip(skip)
       .limit(limit),
 
@@ -48,7 +48,6 @@ export const getColorThemes = async (
 
   return {
     items: colorThemes,
-
     pagination: {
       total,
       page,
@@ -61,8 +60,7 @@ export const getColorThemes = async (
 export const getColorThemeById = async (
   id: string
 ) => {
-  const colorTheme =
-    await ColorTheme.findById(id);
+  const colorTheme = await ColorTheme.findById(id);
 
   if (!colorTheme) {
     throw new ApiError(
@@ -78,8 +76,7 @@ export const updateColorTheme = async (
   id: string,
   data: UpdateColorThemeData
 ) => {
-  const colorTheme =
-    await ColorTheme.findById(id);
+  const colorTheme = await ColorTheme.findById(id);
 
   if (!colorTheme) {
     throw new ApiError(
@@ -89,16 +86,16 @@ export const updateColorTheme = async (
   }
 
   if (data.name) {
-    const existingColorTheme =
-      await ColorTheme.findOne({
-        name: data.name,
-        _id: { $ne: id },
-      });
+    const existingColorTheme = await ColorTheme.findOne({
+      name: data.name,
+      _id: { $ne: id },
+    });
 
     if (existingColorTheme) {
       throw new ApiError(
         409,
-        "Color theme already exists"
+        "Color theme already exists",
+        "COLOR_THEME_EXISTS"
       );
     }
   }
@@ -111,8 +108,7 @@ export const updateColorTheme = async (
 export const deleteColorTheme = async (
   id: string
 ) => {
-  const colorTheme =
-    await ColorTheme.findById(id);
+  const colorTheme = await ColorTheme.findById(id);
 
   if (!colorTheme) {
     throw new ApiError(

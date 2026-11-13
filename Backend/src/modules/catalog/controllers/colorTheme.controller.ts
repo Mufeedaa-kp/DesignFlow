@@ -1,10 +1,9 @@
+
 import { Request, Response, NextFunction } from "express";
 
 import * as colorThemeService from "../services/colorTheme.service";
 
 import { ApiResponse } from "../../../utils/ApiResponse";
-import { ApiError } from "../../../utils/ApiError";
-import { uploadBufferToCloudinary } from "../../../utils/cloudinary";
 
 // Create Color Theme
 export const createColorTheme = async (
@@ -13,25 +12,12 @@ export const createColorTheme = async (
   next: NextFunction
 ) => {
   try {
-    const { name } = req.body;
-
-    if (!req.file) {
-      throw new ApiError(
-        400,
-        "Color theme image is required"
-      );
-    }
-
-    const imageUrl =
-      await uploadBufferToCloudinary(
-        req.file.buffer,
-        "designflow/color-themes"
-      );
+    const { name, colors } = req.body;
 
     const colorTheme =
       await colorThemeService.createColorTheme({
         name,
-        image: imageUrl,
+        colors,
       });
 
     res.status(201).json(
@@ -80,6 +66,7 @@ export const getColorThemes = async (
     next(error);
   }
 };
+
 // Get Color Theme By ID
 export const getColorThemeById = async (
   req: Request,
@@ -117,23 +104,15 @@ export const updateColorTheme = async (
       ? req.params.id[0]
       : req.params.id;
 
-    const { name } = req.body;
-
-    let image;
-
-    if (req.file) {
-      image = await uploadBufferToCloudinary(
-        req.file.buffer,
-        "designflow/color-themes"
-      );
-    }
+    const { name, colors, isActive } = req.body;
 
     const colorTheme =
       await colorThemeService.updateColorTheme(
         id,
         {
-          name,
-          ...(image && { image }),
+          ...(name !== undefined && { name }),
+          ...(colors !== undefined && { colors }),
+          ...(isActive !== undefined && { isActive }),
         }
       );
 

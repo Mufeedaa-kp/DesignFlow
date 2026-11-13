@@ -6,6 +6,7 @@ import { useClientMoodBoard } from "../../../moodboards/hooks/useMoodBoards";
 
 import type { IProjectResponse } from "../../types/project.types";
 
+
 const statusLabels: Record<string, string> = {
   planning: "Planning",
   in_progress: "In Progress",
@@ -97,7 +98,7 @@ const ClientProjectCard = ({
       </Link>
 
       {/* Card Content */}
-      <div className="p-4">
+              <div className="p-6">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h2 className="truncate text-base font-semibold text-charcoal">
@@ -221,7 +222,11 @@ const ClientProjectsPage = () => {
   }
 
   return (
-    <div className="p-4 sm:p-6">
+    <>
+      
+
+      <section className="section">
+        <div className="container-page">
       {/* Header */}
       <div className="mb-5 sm:mb-6">
         <h1 className="text-lg font-semibold text-charcoal sm:text-xl">
@@ -233,24 +238,26 @@ const ClientProjectsPage = () => {
         </p>
       </div>
 
-      {/* Empty State */}
-      {projects.length === 0 ? (
-        <div className="rounded-lg border border-border bg-cream p-6 text-center sm:p-8">
-          <p className="text-sm text-muted">
-            No projects available yet.
-          </p>
+        {/* Empty State */}
+        {projects.length === 0 ? (
+          <div className="rounded-lg border border-border bg-cream p-6 text-center sm:p-8">
+            <p className="text-sm text-muted">
+              No projects available yet.
+            </p>
+          </div>
+        ) : (
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {projects.map((project) => (
+              <ClientProjectCard
+                key={project._id}
+                project={project}
+              />
+            ))}
+          </div>
+        )}
         </div>
-      ) : (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {projects.map((project) => (
-            <ClientProjectCard
-              key={project._id}
-              project={project}
-            />
-          ))}
-        </div>
-      )}
-    </div>
+      </section>
+    </>
   );
 };
 

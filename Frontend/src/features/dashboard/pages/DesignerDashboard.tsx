@@ -7,9 +7,9 @@ import { PieChart, Pie, Cell } from "recharts";
 
 const STATUS_COLORS: Record<string, string> = {
   planning: "#EDE6D8",
-  in_progress: "#B98B4E",
-  completed: "#8B5A2B",
-}
+  in_progress: "#9C6B3E",
+  completed: "#8A6E29",
+};
 
 const DesignerDashboard = () => {
   const { user } = useAuth();
@@ -43,7 +43,7 @@ const DesignerDashboard = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         {stats.map((stat) => (
-          <div key={stat.label} className="bg-white rounded-xl border border-border p-5 shadow-sm">
+          <div key={stat.label} className="bg-surface rounded-xl border border-border p-5 shadow-sm">
             <span className="w-9 h-9 rounded-lg bg-panel flex items-center justify-center text-clay mb-4">
               <stat.icon size={16} />
             </span>
@@ -55,7 +55,7 @@ const DesignerDashboard = () => {
         ))}
       </div>
 
-      <div className="bg-white rounded-xl border border-border p-5 shadow-sm mb-8">
+      <div className="bg-surface rounded-xl border border-border p-5 shadow-sm mb-8">
         <h2 className="font-serif font-bold text-lg text-charcoal mb-4">Your project status</h2>
 
         {isLoading && <p className="text-sm text-muted">Loading...</p>}

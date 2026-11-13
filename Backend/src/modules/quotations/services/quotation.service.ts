@@ -132,8 +132,9 @@ export const createQuotationService = async (
 
   if (existingQuotation) {
     throw new ApiError(
-      400,
-      "A quotation already exists for this project"
+      409,
+      "A quotation already exists for this project",
+      "QUOTATION_EXISTS"
     );
   }
 

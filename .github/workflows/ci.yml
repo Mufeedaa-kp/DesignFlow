@@ -1,0 +1,41 @@
+
+name: DesignFlow CI
+
+on:
+  push:
+    branches:
+      - main
+      - designglow/updates
+  pull_request:
+    branches:
+      - main
+      - designglow/updates
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            Backend/package-lock.json
+            Frontend/package-lock.json
+
+      - name: Install Backend dependencies
+        run: npm ci --prefix Backend
+
+      - name: Install Frontend dependencies
+        run: npm ci --prefix Frontend
+
+      - name: Build Backend
+        run: npm run build --prefix Backend
+
+      - name: Build Frontend
+        run: npm run build --prefix Frontend

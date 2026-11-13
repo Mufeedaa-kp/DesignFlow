@@ -1,3 +1,4 @@
+
 import { useNavigate } from "react-router-dom";
 
 import type { ICategory } from "../types/catalog.types";
@@ -21,18 +22,18 @@ const CategoryCard = ({
 
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md">
-      
+
       {/* Category Image */}
-      <div
-        onClick={handleOpenCategory}
-        className="cursor-pointer"
-      >
-        <img
-          src={category.image}
-          alt={category.name}
-          className="h-48 w-full object-cover"
-        />
-      </div>
+<div
+  onClick={handleOpenCategory}
+  className="aspect-[4/3] w-full cursor-pointer overflow-hidden"
+>
+  <img
+    src={category.image}
+    alt={category.name}
+    className="h-full w-full object-cover"
+  />
+</div>
 
       {/* Category Content */}
       <div className="p-5">

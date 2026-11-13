@@ -1,11 +1,19 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
-import { isAxiosError } from "axios";
+import { Mail, Lock } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { useLoginMutation } from "../hooks/useAuthMutations";
+import {
+  useGoogleAuth,
+  type GoogleAuthFailure,
+} from "../hooks/useGoogleAuth";
 import { loginSchema, type LoginFormValues } from "../schema/auth.schema";
 import AuthLayout from "../layouts/AuthLayout";
+import GoogleSignInButton from "./GoogleSignInButton";
+import { isGoogleSignInConfigured } from "../utils/googleClientId";
+import { getErrorMessage } from "../../../shared/utils/errors";
+import AuthInput from "./AuthInput";
 
 type Role = "admin" | "designer" | "client";
 
@@ -13,31 +21,50 @@ interface LoginFormProps {
   role: Role;
   heading: string;
   subheading: string;
+  showGoogleSignIn?: boolean;
 }
 
 const roleRedirects: Record<Role, string> = {
   admin: "/admin/dashboard",
   designer: "/designer/dashboard",
-  client: "/client/dashboard",
+  client: "/",
 };
 
-const LoginForm = ({ role, heading, subheading }: LoginFormProps) => {
+const LoginForm = ({
+  role,
+  heading,
+  subheading,
+  showGoogleSignIn = false,
+}: LoginFormProps) => {
   const [form, setForm] = useState<LoginFormValues>({ email: "", password: "" });
   const [errors, setErrors] = useState<Partial<Record<keyof LoginFormValues, string>>>({});
+  const [submitError, setSubmitError] = useState("");
+  const [googleError, setGoogleError] = useState<GoogleAuthFailure | null>(null);
   const { login } = useAuth();
   const navigate = useNavigate();
   const { mutateAsync: doLogin, isPending } = useLoginMutation();
+  const { signInWithGoogle, isPending: isGooglePending } = useGoogleAuth();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleGoogleCredential = async (credential: string) => {
+    setGoogleError(null);
+    setSubmitError("");
+
+    const failure = await signInWithGoogle(credential, role);
+
+    if (failure) {
+      setGoogleError(failure);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
+    setSubmitError("");
+    setGoogleError(null);
 
     const result = loginSchema.safeParse(form);
     if (!result.success) {
+      console.error("Login validation errors:", result.error.issues);
       const fieldErrors: Partial<Record<keyof LoginFormValues, string>> = {};
       result.error.issues.forEach((issue) => {
         fieldErrors[issue.path[0] as keyof LoginFormValues] = issue.message;
@@ -52,97 +79,128 @@ const LoginForm = ({ role, heading, subheading }: LoginFormProps) => {
       toast.success("Login successful");
       navigate(roleRedirects[data.user.role as Role], {replace:true});
     } catch (err: unknown) {
-      if (isAxiosError(err)) {
-        toast.error(err.response?.data?.message || "Login failed");
-      } else {
-        toast.error("Login failed");
-      }
+      setSubmitError(getErrorMessage(err));
     }
   };
 
-  const inputClass =
-    "w-full bg-white border border-border rounded-md text-charcoal text-sm " +
-    "px-3 py-2.5 focus:outline-none focus:border-amber transition-colors " +
-    "placeholder:text-muted/70";
-  const errorClass = "text-xs text-ember mt-1";
-
   return (
     <AuthLayout>
-      <p className="font-serif font-bold text-2xl text-charcoal mb-1">{heading}</p>
-      <p className="text-sm text-muted mb-8">{subheading}</p>
+      <p className="font-serif text-2xl text-cream mb-1">{heading}</p>
+      <p className="text-sm text-cream/70 mb-5">{subheading}</p>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <div>
-          <label className="block text-xs text-muted uppercase tracking-wide font-semibold mb-2">
-            Email
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <AuthInput
+          id="email"
+          label="Email"
+          type="email"
+          value={form.email}
+          onChange={(v) => {
+            setForm({ ...form, email: v });
+            setErrors((prev) => ({ ...prev, email: undefined }));
+          }}
+          placeholder="you@example.com"
+          icon={<Mail size={18} />}
+          error={errors.email}
+          autoComplete="email"
+        />
+
+        <AuthInput
+          id="password"
+          label="Password"
+          type="password"
+          value={form.password}
+          onChange={(v) => {
+            setForm({ ...form, password: v });
+            setErrors((prev) => ({ ...prev, password: undefined }));
+          }}
+          placeholder="Enter your password"
+          icon={<Lock size={18} />}
+          error={errors.password}
+          autoComplete="current-password"
+        />
+
+        <div className="flex items-center justify-between text-sm">
+          <label className="flex items-center gap-2 text-cream/80">
+            <input type="checkbox" className="rounded border-cream/40 bg-transparent" />
+            Remember me
           </label>
-          <input
-            name="email"
-            type="email"
-            placeholder="you@example.com"
-            value={form.email}
-            onChange={handleChange}
-            className={inputClass}
-          />
-          {errors.email && <p className={errorClass}>{errors.email}</p>}
+          <Link to="/forgot-password" className="text-amber hover:underline">
+            Forgot password?
+          </Link>
         </div>
 
-        <div>
-          <div className="flex justify-between items-center mb-2">
-            <label className="block text-xs text-muted uppercase tracking-wide font-semibold">
-              Password
-            </label>
-            <Link to="/forgot-password" className="text-xs text-amber underline underline-offset-2">
-              Forgot?
-            </Link>
-          </div>
-          <input
-            name="password"
-            type="password"
-            placeholder="••••••••"
-            value={form.password}
-            onChange={handleChange}
-            className={inputClass}
-          />
-          {errors.password && <p className={errorClass}>{errors.password}</p>}
-        </div>
+        {submitError && (
+          <p role="alert" className="text-xs text-red-300">
+            {submitError}
+          </p>
+        )}
 
         <button
           type="submit"
-          disabled={isPending}
-          className="w-full bg-clay hover:bg-ember transition-colors text-cream
-                     text-xs uppercase tracking-wider font-semibold py-3 rounded-md
-                     disabled:opacity-60"
+          disabled={isPending || isGooglePending}
+          className="w-full rounded-full bg-gradient-to-r from-[var(--color-brown)] to-amber py-2.5 text-sm uppercase tracking-wide text-cream hover:brightness-110 transition disabled:opacity-60"
         >
-          {isPending ? "Signing in..." : "Sign in"}
+          {isPending ? "Signing in..." : "Sign In"}
         </button>
       </form>
 
-      {role === "client" && (
-  <>
-    <p className="text-sm text-muted mt-8">
-      Don't have an account?{" "}
-      <Link to="/register" className="text-amber underline underline-offset-2 font-medium">
-        Create one
-      </Link>
-    </p>
-    <p className="text-sm text-muted mt-3">
-      Are you a designer?{" "}
-      <Link to="/designer/login" className="text-amber underline underline-offset-2 font-medium">
-        Sign in here
-      </Link>
-    </p>
-  </>
-)}
+      {showGoogleSignIn && isGoogleSignInConfigured() && (
+        <div className="mt-4">
+          <div className="flex items-center gap-3">
+            <div className="h-px flex-1 bg-cream/20" />
+            <span className="text-xs uppercase tracking-wide text-cream/70">or</span>
+            <div className="h-px flex-1 bg-cream/20" />
+          </div>
 
-{role === "designer" && (
-  <p className="text-sm text-muted mt-8">
-    Are you a client?{" "}
-    <Link to="/client/login" className="text-amber underline underline-offset-2 font-medium">
-      Sign in here
-    </Link>
-  </p>
-)}
+          <div className="mt-4">
+            <GoogleSignInButton
+              onCredential={handleGoogleCredential}
+              disabled={isPending}
+              pending={isGooglePending}
+            />
+          </div>
+
+          {googleError && (
+            <p role="alert" className="mt-2 text-center text-xs text-red-300">
+              {googleError.message}{" "}
+              {googleError.action && (
+                <Link
+                  to={googleError.action.to}
+                  className="font-medium underline underline-offset-2"
+                >
+                  {googleError.action.label}
+                </Link>
+              )}
+            </p>
+          )}
+        </div>
+      )}
+
+      {role === "client" && (
+        <>
+          <p className="text-sm text-cream/80 mt-4 text-center">
+            Don't have an account?{" "}
+            <Link to="/register" className="text-amber hover:underline">
+              Sign up
+            </Link>
+          </p>
+          <p className="text-xs text-cream/70 mt-1 text-center">
+            Are you a designer?{" "}
+            <Link to="/designer/login" className="text-amber hover:underline">
+              Sign in here
+            </Link>
+          </p>
+        </>
+      )}
+
+      {role === "designer" && (
+        <p className="text-sm text-cream/80 mt-4 text-center">
+          Are you a client?{" "}
+          <Link to="/client/login" className="text-amber hover:underline">
+            Sign in here
+          </Link>
+        </p>
+      )}
     </AuthLayout>
   );
 };

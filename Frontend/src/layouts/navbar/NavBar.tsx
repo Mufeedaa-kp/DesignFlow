@@ -5,6 +5,7 @@ import SearchBar from "./SearchBar";
 import NotificationButton from "./NotificationButton";
 import ProfileMenu from "./ProfileMenu";
 import { useUnreadNotificationCount } from "../../features/notifications/hooks/useNotifications";
+import { useAppSelector } from "../../store/hooks";
 
 
 interface NavBarLink {
@@ -18,11 +19,12 @@ interface NavBarProps {
   onMenuClick?: () => void;
 }
 
-const SEARCHABLE_PATH_SEGMENTS = [
-  "/projects",
-  "/users",
-  "/requests",
-];
+const SEARCHABLE_PATHS = new Set([
+  "/admin/projects",
+  "/admin/users",
+  "/designer/projects",
+  "/designer/clients",
+]);
 
 const NavBar = ({
   title,
@@ -33,15 +35,24 @@ const NavBar = ({
   useUnreadNotificationCount();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const user = useAppSelector((state) => state.auth.user);
+
+  const notificationPath =
+    user?.role === "admin"
+      ? "/admin/notifications"
+      : user?.role === "designer"
+        ? "/designer/notifications"
+        : "/client/notifications";
 
   const isQuotationPage =
     location.pathname.includes("/quotation");
 
+  const currentPath =
+    location.pathname.replace(/\/+$/, "") || "/";
+
   const showSearch =
     !isQuotationPage &&
-    SEARCHABLE_PATH_SEGMENTS.some((segment) =>
-      location.pathname.includes(segment)
-    );
+    SEARCHABLE_PATHS.has(currentPath);
 
   const handleHamburgerClick = () => {
     if (onMenuClick) {
@@ -107,11 +118,18 @@ const NavBar = ({
 
           <NotificationButton
             unreadCount={unreadCount}
+            to={notificationPath}
           />
 
           <ProfileMenu />
         </div>
       </div>
+
+      {showSearch && (
+        <div className="border-t border-border px-4 py-2.5 sm:hidden">
+          <SearchBar />
+        </div>
+      )}
 
       {/* Internal mobile dropdown */}
       {!onMenuClick &&
@@ -136,12 +154,6 @@ const NavBar = ({
                 {link.label}
               </RouterNavLink>
             ))}
-
-            {showSearch && (
-              <div className="sm:hidden pt-2">
-                <SearchBar />
-              </div>
-            )}
           </nav>
         )}
     </header>

@@ -3,17 +3,19 @@ import { Bell } from "lucide-react";
 
 interface NotificationButtonProps {
   unreadCount?: number;
+  to?: string;
 }
 
 const NotificationButton = ({
   unreadCount = 0,
+  to = "/notifications",
 }: NotificationButtonProps) => {
   const navigate = useNavigate();
 
   return (
     <button
       type="button"
-      onClick={() => navigate("/notifications")}
+      onClick={() => navigate(to)}
       className="relative text-muted hover:text-charcoal transition-colors"
       aria-label="Notifications"
     >

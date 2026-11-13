@@ -51,7 +51,7 @@ export const getUserById = async (
  
 export const createUser = async (data: { fullName: string; email: string; password: string; role: "designer" | "admin"; phone?: string }) => {
   const existingUser = await User.findOne({ email: data.email });
-  if (existingUser) throw new ApiError(400, "Email already registered");
+  if (existingUser) throw new ApiError(409, "Email already registered", "EMAIL_ALREADY_EXISTS");
  
   const hashedPassword = await bcrypt.hash(data.password, 10);
   const user = await User.create({ ...data, password: hashedPassword });

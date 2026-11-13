@@ -6,52 +6,20 @@ import {
 } from "../hooks/useMoodBoards";
 
 import { getErrorMessage } from "../../../shared/utils/errors";
+import SafeImage from "../../../shared/components/ui/SafeImage";
+import SearchField from "../../../shared/components/ui/SearchField";
 
-import type {
-  MoodBoardStatus,
-} from "../types/moodboard.types";
+import {
+  getProjectClientName,
+  getProjectImage,
+  getProjectName,
+  getProjectSource,
+} from "../../projects/utils/projectPresentation";
 
-const getStatusLabel = (
-  status: MoodBoardStatus
-) => {
-  switch (status) {
-    case "draft":
-      return "Draft";
-
-    case "submitted":
-      return "Submitted";
-
-    case "changes_requested":
-      return "Changes Requested";
-
-    case "approved":
-      return "Approved";
-
-    default:
-      return status;
-  }
-};
-
-const getStatusClass = (
-  status: MoodBoardStatus
-) => {
-  switch (status) {
-    case "draft":
-      return "bg-gray-100 text-gray-700";
-
-    case "submitted":
-      return "bg-blue-50 text-blue-700";
-
-    case "changes_requested":
-      return "bg-amber-50 text-amber-700";
-
-    case "approved":
-      return "bg-green-50 text-green-700";
-
-    default:
-      return "bg-gray-100 text-gray-700";
-  }
-};
+import {
+  moodBoardStatusLabels,
+  moodBoardStatusStyles,
+} from "../utils/moodboardPresentation";
 
 export default function DesignerMoodBoardsPage() {
   const [page, setPage] = useState(1);
@@ -97,10 +65,10 @@ export default function DesignerMoodBoardsPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-full bg-[#F8F6F2] p-4 sm:p-6">
+      <div className="min-h-full bg-cream p-4 sm:p-6">
         <div className="mx-auto max-w-6xl">
-          <div className="rounded-xl border border-gray-200 bg-white p-6 text-center">
-            <p className="text-sm text-gray-500">
+          <div className="rounded-xl border border-border bg-surface p-6 text-center">
+            <p className="text-sm text-muted">
               Loading Mood Boards...
             </p>
           </div>
@@ -111,10 +79,10 @@ export default function DesignerMoodBoardsPage() {
 
   if (isError) {
     return (
-      <div className="min-h-full bg-[#F8F6F2] p-4 sm:p-6">
+      <div className="min-h-full bg-cream p-4 sm:p-6">
         <div className="mx-auto max-w-6xl">
-          <div className="rounded-xl border border-red-200 bg-white p-6 text-center">
-            <p className="text-sm text-red-600">
+          <div className="rounded-xl border border-ember/25 bg-surface p-6 text-center">
+            <p className="text-sm text-ember">
               {getErrorMessage(error)}
             </p>
           </div>
@@ -124,23 +92,23 @@ export default function DesignerMoodBoardsPage() {
   }
 
   return (
-    <div className="min-h-full bg-[#F8F6F2] p-4 sm:p-6">
+    <div className="min-h-full bg-cream p-4 sm:p-6">
       <div className="mx-auto max-w-6xl">
         {/* Header */}
 
         <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="text-xl font-semibold text-[#3F3026]">
+            <h1 className="font-serif text-3xl font-bold text-charcoal">
               Mood Boards
             </h1>
 
-            <p className="mt-1 text-sm text-gray-500">
-              Manage design boards for your
-              assigned projects.
+            <p className="mt-1 text-sm text-muted">
+              Create and manage mood boards for
+              projects with an accepted quotation.
             </p>
           </div>
 
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-muted">
             {total} project
             {total !== 1 ? "s" : ""}
           </div>
@@ -149,31 +117,26 @@ export default function DesignerMoodBoardsPage() {
         {/* Search */}
 
         <div className="mb-5">
-          <input
-            type="text"
+          <SearchField
             value={searchInput}
-            onChange={(event) =>
-              setSearchInput(
-                event.target.value
-              )
-            }
-            placeholder="Search client name or email..."
-            className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-700 outline-none transition focus:border-[#8B5E3C] focus:ring-1 focus:ring-[#8B5E3C]"
+            onChange={setSearchInput}
+            placeholder="Search project or client..."
+            ariaLabel="Search mood boards"
           />
         </div>
 
         {/* Empty */}
 
         {items.length === 0 ? (
-          <div className="rounded-xl border border-gray-200 bg-white p-8 text-center">
-            <h2 className="text-base font-medium text-[#3F3026]">
+          <div className="rounded-xl border border-border bg-surface p-8 text-center">
+            <h2 className="font-serif text-lg font-bold text-charcoal">
               No projects found
             </h2>
 
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-muted">
               {search
                 ? "No projects match your search."
-                : "You don't have any accepted projects yet."}
+                : "Projects become available after the client accepts your quotation."}
             </p>
           </div>
         ) : (
@@ -188,70 +151,96 @@ export default function DesignerMoodBoardsPage() {
                 const moodBoard =
                   item.moodBoard;
 
+                const source = getProjectSource(
+                  item.project.sourceRequest
+                );
+
+                const projectName =
+                  getProjectName(source);
+
+                const projectImage =
+                  getProjectImage(source);
+
+                const clientName =
+                  getProjectClientName(item.client);
+
                 return (
                   <Link
                     key={item._id}
                     to={`/designer/moodboards/${projectId}`}
-                    className="group rounded-xl border border-gray-200 bg-white p-4 transition hover:border-[#C68E4F] hover:shadow-sm"
+                    className="group overflow-hidden rounded-xl border border-border bg-surface transition hover:border-amber hover:shadow-sm"
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <h2 className="truncate text-base font-semibold text-[#3F3026]">
-                          {item.client
-                            ?.fullName ||
-                            "Client"}
-                        </h2>
+                    <SafeImage
+                      src={projectImage}
+                      alt={projectName}
+                      className="h-40 w-full object-cover"
+                    />
 
-                        <p className="mt-1 truncate text-xs text-gray-500">
-                          {item.client
-                            ?.email ||
-                            "No email"}
-                        </p>
-                      </div>
+                    <div className="p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <h2 className="truncate font-serif text-lg font-bold text-charcoal">
+                            {projectName}
+                          </h2>
 
-                      {moodBoard ? (
-                        <span
-                          className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium ${getStatusClass(
-                            moodBoard.status
-                          )}`}
-                        >
-                          {getStatusLabel(
-                            moodBoard.status
-                          )}
-                        </span>
-                      ) : (
-                        <span className="shrink-0 rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-medium text-gray-600">
-                          Not Created
-                        </span>
-                      )}
-                    </div>
+                          <p className="mt-1 truncate text-xs text-muted">
+                            {clientName}
+                          </p>
 
-                    <div className="mt-4 border-t border-gray-100 pt-3">
-                      {moodBoard ? (
-                        <div className="flex items-center justify-between text-xs text-gray-500">
-                          <span>
-                            Versions
-                          </span>
+                          <p className="mt-0.5 truncate text-xs text-muted">
+                            {item.client?.email ||
+                              "No email"}
+                          </p>
+                        </div>
 
-                          <span className="font-medium text-gray-700">
+                        {moodBoard ? (
+                          <span
+                            className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium ${
+                              moodBoardStatusStyles[
+                                moodBoard.status
+                              ]
+                            }`}
+                          >
                             {
-                              moodBoard
-                                .versions
-                                .length
+                              moodBoardStatusLabels[
+                                moodBoard.status
+                              ]
                             }
                           </span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-gray-500">
-                            Mood Board
+                        ) : (
+                          <span className="shrink-0 rounded-full bg-amber/10 px-2.5 py-1 text-[11px] font-medium text-amber">
+                            Ready to create
                           </span>
+                        )}
+                      </div>
 
-                          <span className="font-medium text-[#8B5E3C] group-hover:underline">
-                            Create →
-                          </span>
-                        </div>
-                      )}
+                      <div className="mt-4 flex items-center justify-between border-t border-border/70 pt-3 text-xs">
+                        {moodBoard ? (
+                          <>
+                            <span className="text-muted">
+                              Versions
+                            </span>
+
+                            <span className="font-medium text-charcoal">
+                              {
+                                moodBoard
+                                  .versions
+                                  .length
+                              }
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="text-muted">
+                              Mood Board
+                            </span>
+
+                            <span className="font-medium text-clay group-hover:underline">
+                              Create →
+                            </span>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </Link>
                 );
@@ -261,7 +250,7 @@ export default function DesignerMoodBoardsPage() {
             {/* Pagination */}
 
             {totalPages > 1 && (
-              <div className="mt-6 flex items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3">
+              <div className="mt-6 flex items-center justify-between rounded-xl border border-border bg-surface px-4 py-3">
                 <button
                   type="button"
                   disabled={page <= 1}
@@ -274,12 +263,12 @@ export default function DesignerMoodBoardsPage() {
                         )
                     )
                   }
-                  className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="rounded-lg border border-border px-3 py-1.5 text-sm text-muted transition hover:bg-panel disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   Previous
                 </button>
 
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-muted">
                   Page {page} of{" "}
                   {totalPages}
                 </span>
@@ -298,7 +287,7 @@ export default function DesignerMoodBoardsPage() {
                         )
                     )
                   }
-                  className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="rounded-lg border border-border px-3 py-1.5 text-sm text-muted transition hover:bg-panel disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   Next
                 </button>

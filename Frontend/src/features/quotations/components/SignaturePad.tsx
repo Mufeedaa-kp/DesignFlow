@@ -158,12 +158,12 @@ const SignaturePad = ({
     ctx.lineWidth = 2;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
-    ctx.strokeStyle = "#3F332A";
+    ctx.strokeStyle = "#2B2420";
   }, []);
 
   return (
     <div className="space-y-2">
-      <div className="overflow-hidden rounded-md border border-[#D9C7A3] bg-white">
+      <div className="overflow-hidden rounded-md border border-border bg-surface">
         <canvas
           ref={canvasRef}
           width={600}
@@ -184,7 +184,7 @@ const SignaturePad = ({
       </div>
 
       <div className="flex items-center justify-between">
-        <p className="text-xs text-[#8A7A6B]">
+        <p className="text-xs text-muted">
           Sign inside the box
         </p>
 
@@ -192,7 +192,7 @@ const SignaturePad = ({
           type="button"
           onClick={clearSignature}
           disabled={disabled}
-          className="text-xs font-medium text-[#8B5E3C] hover:underline disabled:opacity-50"
+          className="text-xs font-medium text-clay hover:underline disabled:opacity-50"
         >
           Clear
         </button>

@@ -30,7 +30,7 @@ const CategoryForm = ({
   onCancel,
   category,
 }: CategoryFormProps) => {
-  const isEditMode = Boolean(category);
+  const isEditMode = !!category;
 
   const {
     register,

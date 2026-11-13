@@ -1,8 +1,13 @@
 import axios from "axios";
-import toast from "react-hot-toast";
+
+export const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ??
+  "http://localhost:5000/api";
 
 const api = axios.create({
-  baseURL: "https://api.design-flow.online/api",
+
+  baseURL: API_BASE_URL,
+
   withCredentials: true,
 });
 
@@ -22,15 +27,33 @@ let refreshQueue: Array<
   (token: string) => void
 > = [];
 
+const AUTH_ENDPOINTS = [
+  "/auth/login",
+  "/auth/register/request-otp",
+  "/auth/register/resend",
+  "/auth/register/verify",
+  "/auth/google",
+  "/auth/logout",
+  "/auth/refresh",
+];
+
+const isAuthEndpoint = (url?: string) => {
+  if (!url) {
+    return false;
+  }
+
+  return AUTH_ENDPOINTS.some((endpoint) =>
+    url.includes(endpoint)
+  );
+};
+
 api.interceptors.response.use(
   (response) => response,
 
   async (error) => {
     const originalRequest = error.config;
 
-    if (
-      originalRequest?.url?.includes("/auth/refresh")
-    ) {
+    if (isAuthEndpoint(originalRequest?.url)) {
       return Promise.reject(error);
     }
 
@@ -97,13 +120,6 @@ api.interceptors.response.use(
         isRefreshing = false;
       }
     }
-
-    const message =
-      error.response?.data?.message ||
-      error.message ||
-      "Something went wrong";
-
-    toast.error(message);
 
     return Promise.reject(error);
   }

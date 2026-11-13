@@ -12,7 +12,7 @@ export const createCategory = async (data: {
   });
 
   if (existingCategory) {
-    throw new ApiError(409, "Category already exists");
+    throw new ApiError(409, "Category already exists", "CATEGORY_EXISTS");
   }
 
   const category = await Category.create(data);

@@ -143,13 +143,13 @@ const CreateMoodBoardForm = ({
   };
 
   return (
-    <section className="rounded-xl border border-[#E8DED3] bg-white p-4 sm:p-5">
+    <section className="rounded-xl border border-border bg-surface p-4 sm:p-5">
       <div className="mb-5">
-        <h2 className="text-base font-semibold text-[#3F3026]">
+        <h2 className="font-serif text-lg font-bold text-charcoal">
           Create Mood Board
         </h2>
 
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-muted">
           Upload the first design version for
           the client to review.
         </p>
@@ -162,7 +162,7 @@ const CreateMoodBoardForm = ({
         <div>
           <label
             htmlFor="create-designer-notes"
-            className="mb-1.5 block text-sm font-medium text-gray-700"
+            className="mb-1.5 block text-sm font-medium text-charcoal"
           >
             Designer Notes
           </label>
@@ -172,11 +172,11 @@ const CreateMoodBoardForm = ({
             rows={4}
             {...register("designerNotes")}
             placeholder="Add notes about this design version..."
-            className="w-full rounded-lg border border-[#D9C7A3] px-3 py-2.5 text-sm outline-none focus:border-[#8B5E3C] focus:ring-1 focus:ring-[#8B5E3C]"
+            className="w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-charcoal outline-none focus:border-amber focus:ring-1 focus:ring-amber"
           />
 
           {errors.designerNotes && (
-            <p className="mt-1 text-xs text-red-500">
+            <p className="mt-1 text-xs text-ember">
               {errors.designerNotes.message}
             </p>
           )}
@@ -185,7 +185,7 @@ const CreateMoodBoardForm = ({
         <div>
           <label
             htmlFor="create-mood-board-files"
-            className="mb-1.5 block text-sm font-medium text-gray-700"
+            className="mb-1.5 block text-sm font-medium text-charcoal"
           >
             Design Files
           </label>
@@ -196,10 +196,10 @@ const CreateMoodBoardForm = ({
             multiple
             accept=".jpg,.jpeg,.png,.webp,.pdf"
             onChange={handleFilesChange}
-            className="block w-full rounded-lg border border-[#D9C7A3] bg-white px-3 py-2 text-sm"
+            className="block w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm"
           />
 
-          <p className="mt-1 text-xs text-gray-400">
+          <p className="mt-1 text-xs text-muted">
             JPG, JPEG, PNG, WEBP or PDF.
             Maximum 10 MB per file. Maximum 10
             files.
@@ -207,7 +207,7 @@ const CreateMoodBoardForm = ({
 
           {selectedFiles.length > 0 && (
             <div className="mt-2">
-              <p className="text-xs font-medium text-gray-600">
+              <p className="text-xs font-medium text-muted">
                 {selectedFiles.length} file
                 {selectedFiles.length === 1
                   ? ""
@@ -220,7 +220,7 @@ const CreateMoodBoardForm = ({
                   (file, index) => (
                     <p
                       key={`${file.name}-${index}`}
-                      className="truncate text-xs text-gray-500"
+                      className="truncate text-xs text-muted"
                     >
                       {file.name}
                     </p>
@@ -234,7 +234,7 @@ const CreateMoodBoardForm = ({
         <button
           type="submit"
           disabled={createMutation.isPending}
-          className="rounded-lg bg-[#8B5E3C] px-4 py-2.5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-lg bg-clay px-4 py-2.5 text-sm font-medium text-cream transition hover:bg-ember disabled:cursor-not-allowed disabled:opacity-50"
         >
           {createMutation.isPending
             ? "Uploading..."

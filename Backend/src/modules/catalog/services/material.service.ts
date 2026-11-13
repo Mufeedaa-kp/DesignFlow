@@ -26,7 +26,8 @@ export const createMaterial = async (
   if (existingMaterial) {
     throw new ApiError(
       409,
-      "Material already exists in this type"
+      "Material already exists in this type",
+      "MATERIAL_EXISTS"
     );
   }
 
@@ -92,7 +93,8 @@ export const updateMaterial = async (
     if (existingMaterial) {
       throw new ApiError(
         409,
-        "Material already exists in this type"
+        "Material already exists in this type",
+        "MATERIAL_EXISTS"
       );
     }
   }

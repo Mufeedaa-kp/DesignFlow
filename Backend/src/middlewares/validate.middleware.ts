@@ -9,9 +9,10 @@ export const validate = (schema: ZodType) =>
 
     if (!result.success) {
       return res.status(400).json({
-         success: false, 
-         message: "Validation failed", 
-         errors: result.error.issues 
+         success: false,
+         message: "Validation failed",
+         code: "VALIDATION_ERROR",
+         errors: result.error.issues
         });
     }
 

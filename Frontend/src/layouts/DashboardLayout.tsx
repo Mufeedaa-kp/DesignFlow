@@ -17,7 +17,10 @@ const DashboardLayout = ({ links, title }: DashboardLayoutProps) => {
       <Sidebar links={links} mobileOpen={mobileOpen} onCloseMobile={() => setMobileOpen(false)} />
       <div className="flex-1 flex flex-col min-w-0">
         <Navbar title={title} onMenuClick={() => setMobileOpen(true)} />
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
+        <main
+          data-scroll-container
+          className="flex-1 overflow-y-auto p-4 sm:p-6"
+        >
           <Outlet />
         </main>
       </div>

@@ -5,8 +5,10 @@ import {
   useCreateProjectRequest,
   useUploadProjectRequestImage,
 } from "../../hooks/useClientProjectRequests";
+import { notifyClientError } from "../../../../shared/utils/errors";
 
 import { useMyProfile } from "../../../profile/hooks/useProfile";
+
 
 import ProjectRequestCategoryPage from "./ProjectRequestCategoryPage";
 import ProjectRequestDesignPage from "./ProjectRequestDesignPage";
@@ -19,6 +21,32 @@ import type {
   IColorTheme,
   IMaterial,
 } from "../../../catalog/types/catalog.types";
+
+const STEPS = ["Category", "Design", "Options", "Requirements", "Review"];
+
+const Stepper = ({ current }: { current: number }) => (
+  <ol className="mb-8 flex items-center gap-3 overflow-x-auto whitespace-nowrap text-[11px] font-semibold uppercase tracking-[0.15em]">
+    {STEPS.map((label, i) => {
+      const n = i + 1;
+      return (
+        <li key={label} className="flex items-center gap-3">
+          <span
+            className={
+              n === current
+                ? "border-b border-[var(--color-brown)] pb-1 text-[var(--color-brown)]"
+                : n < current
+                  ? "text-charcoal"
+                  : "text-muted"
+            }
+          >
+            {n}. {label}
+          </span>
+          {n < STEPS.length && <span className="text-border">→</span>}
+        </li>
+      );
+    })}
+  </ol>
+);
 
 const CreateProjectRequestPage = () => {
   const [step, setStep] = useState(1);
@@ -213,6 +241,7 @@ const [formData, setFormData] = useState({
             "Failed to upload reference image:",
             error
           );
+          notifyClientError(error, "Image upload failed");
         }
       }
 
@@ -298,7 +327,8 @@ const [formData, setFormData] = useState({
             error
           );
 
-          toast.error(
+          notifyClientError(
+            error,
             "Failed to submit project request. Please try again."
           );
         },
@@ -318,8 +348,13 @@ const [formData, setFormData] = useState({
     );
 
   return (
-    <div className="min-h-screen bg-[#F8F6F2] px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-6xl">
+    <>
+      
+
+      <section className="section">
+        <div className="container-page">
+          <Stepper current={step} />
+
         {step === 1 && (
           <ProjectRequestCategoryPage
             selectedCategoryId={
@@ -455,8 +490,9 @@ const [formData, setFormData] = useState({
             onSubmit={handleSubmit}
           />
         )}
-      </div>
-    </div>
+         </div>
+      </section>
+    </>
   );
 };
 

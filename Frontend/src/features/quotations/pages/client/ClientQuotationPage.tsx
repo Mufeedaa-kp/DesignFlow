@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { getErrorMessage } from "../../../../shared/utils/errors";
+import { notifyClientError } from "../../../../shared/utils/errors";
 
 import {
   useQuotationByProject,
@@ -92,7 +92,7 @@ export default function ClientQuotationPage() {
         "Quotation accepted successfully"
       );
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error));
+      notifyClientError(error);
     }
   };
 
@@ -114,7 +114,7 @@ export default function ClientQuotationPage() {
       setShowRejectForm(false);
       reset();
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error));
+      notifyClientError(error);
     }
   };
 
@@ -130,7 +130,7 @@ export default function ClientQuotationPage() {
         "Quotation downloaded successfully"
       );
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error));
+      notifyClientError(error);
     }
   };
 

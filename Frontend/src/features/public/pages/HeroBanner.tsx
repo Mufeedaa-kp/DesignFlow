@@ -8,30 +8,45 @@ const HeroBanner = ({
   label,
   quote,
   image,
-}: HeroBannerProps) => (
-  <section className="relative h-[55vh] min-h-95 overflow-hidden">
-    {image ? (
-      <img
-        src={image}
-        alt=""
-        className="absolute inset-0 w-full h-full object-cover"
-      />
-    ) : (
-      <div className="absolute inset-0 bg-linear-to-br from-panel via-cream to-surface" />
-    )}
+}: HeroBannerProps) => {
+  const headingLines = quote.split("\n");
 
-    <div className="absolute inset-0 bg-linear-to-t from-charcoal/75 via-charcoal/25 to-charcoal/50" />
+  return (
+    <section className="hero-fullscreen relative overflow-hidden">
+      {image ? (
+        <img
+          src={image}
+          alt=""
+          className="hero-fullscreen-img hero-zoom"
+        />
+      ) : (
+        <div className="absolute inset-0 bg-[var(--color-brown-dark)]" />
+      )}
 
-    <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-6">
-      <span className="text-xs uppercase tracking-[0.28em] text-amber mb-5">
-        {label}
-      </span>
+      <div className="hero-fullscreen-overlay" />
 
-      <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-cream max-w-2xl leading-tight">
-        {quote}
-      </h1>
-    </div>
-  </section>
-);
+      <div className="relative z-10 container-page flex flex-col items-start justify-center pt-[calc(var(--navbar-height)+2rem)] pb-12">
+        <div className="max-w-3xl">
+          <span className="fade-up section-label mb-6 text-[#f5e7d3]" style={{ animationDelay: "0.1s", textShadow: "0 1px 8px rgba(0,0,0,0.4)" }}>
+            {label}
+          </span>
+
+          <h1 className="hero-heading mb-6">
+            {headingLines.map((line, index) => (
+              <span key={index} className="text-reveal-mask">
+                <span
+                  className="text-reveal-line"
+                  style={{ animationDelay: `${0.25 + index * 0.12}s` }}
+                >
+                  {line}
+                </span>
+              </span>
+            ))}
+          </h1>
+        </div>
+      </div>
+    </section>
+  );
+};
 
 export default HeroBanner;

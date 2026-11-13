@@ -26,7 +26,8 @@ export const createCatalogItem = async (data: {
   if (existingItem) {
     throw new ApiError(
       409,
-      "Catalog item already exists in this category"
+      "Catalog item already exists in this category",
+      "CATALOG_ITEM_EXISTS"
     );
   }
 

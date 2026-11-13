@@ -1,76 +1,42 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { useForm, useFieldArray } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import toast from "react-hot-toast";
+import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 
 import {
-  useQuotationByProject,
-  useCreateQuotation,
-  useUpdateQuotation,
-  useSubmitQuotationForApproval,
-  useDownloadQuotation,
+  useDesignerQuotations,
 } from "../../hooks/useQuotations";
 
-import { useProjectById } from "../../../projects/hooks/useProjects";
+import { useMyAssignedProjects } from "../../../projects/hooks/useProjects";
 
-import {
-  quotationSchema,
-  type QuotationFormValues,
-} from "../../schema/quotation.schema";
-
-import type { IQuotation } from "../../types/quotation.types";
+import SafeImage from "../../../../shared/components/ui/SafeImage";
+import SearchField from "../../../../shared/components/ui/SearchField";
 
 import { getErrorMessage } from "../../../../shared/utils/errors";
 
-import QuotationForm from "../../components/QuotationForm";
-import QuotationSummery from "../../components/QuotationSummery";
-import SignaturePad from "../../components/SignaturePad";
+import {
+  getProjectCategoryName,
+  getProjectClientEmail,
+  getProjectClientName,
+  getProjectImage,
+  getProjectName,
+  getProjectSource,
+} from "../../../projects/utils/projectPresentation";
 
-const getQuotationProjectId = (
-  quotation: IQuotation
-): string => {
-  return typeof quotation.project === "string"
-    ? quotation.project
-    : quotation.project._id;
-};
+import {
+  canEditQuotation,
+  getQuotationProjectId,
+  getQuotationRejectionReason,
+  quotationStatusLabels,
+  quotationStatusStyles,
+} from "../../utils/quotationPresentation";
 
-const getStatusLabel = (
-  status: IQuotation["status"]
-) => {
-  switch (status) {
-    case "draft":
-      return "Draft";
-
-    case "pending_admin_approval":
-      return "Pending Admin Approval";
-
-    case "admin_rejected":
-      return "Admin Rejected";
-
-    case "sent":
-      return "Sent to Client";
-
-    case "client_accepted":
-      return "Accepted by Client";
-
-    case "client_rejected":
-      return "Rejected by Client";
-
-    case "expired":
-      return "Expired";
-
-    default:
-      return status;
-  }
-};
+import type { IQuotation } from "../../types/quotation.types";
 
 const formatDate = (date?: string) => {
-  if (!date) return "—";
+  if (!date) return "Not specified";
 
   return new Date(date).toLocaleDateString("en-IN", {
     day: "2-digit",
-    month: "long",
+    month: "short",
     year: "numeric",
   });
 };
@@ -79,700 +45,456 @@ const formatCurrency = (amount: number) => {
   return `₹${amount.toLocaleString("en-IN")}`;
 };
 
+const matchesSearch = (
+  search: string,
+  values: Array<string | undefined>
+) => {
+  if (!search) return true;
+
+  return values.some((value) =>
+    value?.toLowerCase().includes(search)
+  );
+};
+
 const DesignerQuotationsPage = () => {
-  const { projectId } = useParams<{
-    projectId: string;
-  }>();
+  const location = useLocation();
 
-  const navigate = useNavigate();
-
-  const [isEditing, setIsEditing] = useState(false);
-
-  const [designerSignature, setDesignerSignature] =
+  const [searchInput, setSearchInput] =
     useState("");
 
-  const {
-    data: projectData,
-  } = useProjectById(projectId ?? "");
+  const quotationOrigin =
+    `${location.pathname}${location.search}`;
 
   const {
-    data: quotation,
-    isLoading,
-    isError,
-    error,
-  } = useQuotationByProject(
-    projectId ?? "",
-    Boolean(projectId)
+    data: projects = [],
+    isLoading: isProjectsLoading,
+    isError: isProjectsError,
+    error: projectsError,
+  } = useMyAssignedProjects();
+
+  const {
+    data: quotations = [],
+    isLoading: isQuotationsLoading,
+    isError: isQuotationsError,
+    error: quotationsError,
+  } = useDesignerQuotations();
+
+  const search = searchInput.trim().toLowerCase();
+
+  const projectsById = new Map(
+    projects.map((project) => [
+      project._id,
+      project,
+    ])
   );
 
-  const createQuotationMutation =
-    useCreateQuotation();
+  const quotationProjectIds = new Set(
+    quotations.map(getQuotationProjectId)
+  );
 
-  const updateQuotationMutation =
-    useUpdateQuotation();
+  const awaitingQuotation =
+    projects
+      .filter(
+        (project) =>
+          project.designerStatus === "accepted" &&
+          !quotationProjectIds.has(project._id)
+      )
+      .map((project) => {
+        const source = getProjectSource(
+          project.sourceRequest
+        );
 
-  const submitQuotationMutation =
-    useSubmitQuotationForApproval();
-
-  const downloadMutation =
-    useDownloadQuotation();
-
-  const form = useForm<QuotationFormValues>({
-    resolver: zodResolver(quotationSchema),
-
-    defaultValues: {
-      projectId: projectId ?? "",
-
-      items: [
-        {
-          description: "",
-          quantity: 1,
-          unitPrice: 0,
-        },
-      ],
-
-      discount: 0,
-      tax: 0,
-      notes: "",
-    },
-  });
-
-  const {
-    control,
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = form;
-
-  const fieldArray = useFieldArray({
-    control,
-    name: "items",
-  });
-
-  useEffect(() => {
-    if (!quotation) return;
-
-    reset({
-      projectId: getQuotationProjectId(quotation),
-
-      items: quotation.items.map((item) => ({
-        description: item.description,
-        quantity: item.quantity,
-        unitPrice: item.unitPrice,
-      })),
-
-      discount: quotation.discount,
-      tax: quotation.tax,
-      notes: quotation.notes ?? "",
-    });
-  }, [quotation, reset]);
-
-  const quotationProjectId = quotation
-    ? getQuotationProjectId(quotation)
-    : projectId ?? "";
-
-  const handleFormSubmit = async (
-    data: QuotationFormValues
-  ) => {
-    try {
-      if (quotation) {
-        const updatedQuotation =
-          await updateQuotationMutation.mutateAsync({
-            quotationId: quotation._id,
-            data,
-          });
-
-        reset({
-          projectId: getQuotationProjectId(
-            updatedQuotation
+        return {
+          project,
+          projectName: getProjectName(source),
+          projectImage: getProjectImage(source),
+          category: getProjectCategoryName(source),
+          needBy: source?.needBy,
+          clientName: getProjectClientName(
+            project.client
           ),
-
-          items: updatedQuotation.items.map(
-            (item) => ({
-              description: item.description,
-              quantity: item.quantity,
-              unitPrice: item.unitPrice,
-            })
-          ),
-
-          discount: updatedQuotation.discount,
-          tax: updatedQuotation.tax,
-          notes: updatedQuotation.notes ?? "",
-        });
-
-        toast.success(
-          "Quotation updated successfully"
-        );
-
-        setIsEditing(false);
-      } else {
-        const createdQuotation =
-          await createQuotationMutation.mutateAsync(
-            data
-          );
-
-        toast.success(
-          "Quotation created successfully"
-        );
-
-        navigate(
-          `/designer/projects/${getQuotationProjectId(
-            createdQuotation
-          )}/quotation`,
-          {
-            replace: true,
-          }
-        );
-      }
-    } catch (error: unknown) {
-      toast.error(getErrorMessage(error));
-    }
-  };
-
-  const handleSubmitForApproval = async () => {
-    if (!quotation) return;
-
-    if (!designerSignature) {
-      toast.error(
-        "Please provide your signature before submitting the quotation"
-      );
-      return;
-    }
-
-    try {
-      await submitQuotationMutation.mutateAsync({
-        quotationId: quotation._id,
-        data: {
-          signature: designerSignature,
-        },
-      });
-
-      toast.success(
-        "Quotation submitted for admin approval"
-      );
-    } catch (error: unknown) {
-      toast.error(getErrorMessage(error));
-    }
-  };
-
-  const handleDownload = async () => {
-    if (!quotation) return;
-
-    try {
-      await downloadMutation.mutateAsync(
-        quotation._id
+        };
+      })
+      .filter((item) =>
+        matchesSearch(search, [
+          item.projectName,
+          item.clientName,
+        ])
       );
 
-      toast.success(
-        "Quotation downloaded successfully"
+  const quotationItems = quotations
+    .map((quotation) => {
+      const projectId =
+        getQuotationProjectId(quotation);
+
+      const project =
+        projectsById.get(projectId) ??
+        (typeof quotation.project === "object"
+          ? quotation.project
+          : undefined);
+
+      const source = getProjectSource(
+        project?.sourceRequest
       );
-    } catch (error: unknown) {
-      toast.error(getErrorMessage(error));
-    }
-  };
 
-  const isSaving =
-    createQuotationMutation.isPending ||
-    updateQuotationMutation.isPending;
+      const clientName =
+        typeof quotation.client === "object"
+          ? getProjectClientName(
+              quotation.client
+            )
+          : getProjectClientName(project?.client);
 
-  const canEdit =
-    quotation?.status === "draft" ||
-    quotation?.status === "admin_rejected" ||
-    quotation?.status === "client_rejected";
+      const clientEmail =
+        typeof quotation.client === "object"
+          ? quotation.client.email
+          : getProjectClientEmail(
+              project?.client
+            );
 
-  const canSubmitForApproval =
-    quotation?.status === "draft" ||
-    quotation?.status === "admin_rejected" ||
-    quotation?.status === "client_rejected";
+      return {
+        quotation,
+        projectId,
+        projectName: getProjectName(source),
+        projectImage: getProjectImage(source),
+        clientName,
+        clientEmail,
+      };
+    })
+    .filter((item) =>
+      matchesSearch(search, [
+        item.projectName,
+        item.clientName,
+        item.clientEmail,
+      ])
+    )
+    .sort(
+      (a, b) =>
+        new Date(
+          b.quotation.updatedAt
+        ).getTime() -
+        new Date(
+          a.quotation.updatedAt
+        ).getTime()
+    );
 
-  const canDownload =
-    quotation?.status === "client_accepted";
+  const isLoading =
+    isProjectsLoading || isQuotationsLoading;
 
-  const shouldShowForm =
-    isEditing ||
-    (!isLoading && !quotation);
+  const isError =
+    isProjectsError || isQuotationsError;
+
+  const total =
+    awaitingQuotation.length +
+    quotationItems.length;
 
   if (isLoading) {
     return (
-      <div className="p-6">
-        <div className="rounded-xl border border-gray-200 bg-white p-8 text-center">
-          <p className="text-sm text-gray-500">
-            Loading quotation...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (isError && quotation) {
-    return (
-      <div className="p-6">
-        <div className="rounded-xl border border-red-200 bg-red-50 p-6">
-          <h2 className="text-lg font-semibold text-red-700">
-            Unable to load quotation
-          </h2>
-
-          <p className="mt-2 text-sm text-red-600">
-            {getErrorMessage(error)}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (shouldShowForm) {
-    return (
-      <div className="p-6">
-        <div className="mx-auto max-w-5xl">
-          <div className="mb-6">
-            <button
-              type="button"
-              onClick={() =>
-                quotation
-                  ? setIsEditing(false)
-                  : navigate(
-                      `/designer/projects/${projectId}`
-                    )
-              }
-              className="mb-3 text-sm font-medium text-gray-600 hover:text-gray-900"
-            >
-              ← Back
-            </button>
-
-            <h1 className="text-2xl font-semibold text-gray-900">
-              {quotation
-                ? "Edit Quotation"
-                : "Create Quotation"}
-            </h1>
-
-            <p className="mt-1 text-sm text-gray-500">
-              {quotation
-                ? "Update the quotation details below."
-                : "Prepare a quotation for this project."}
+      <div className="min-h-full bg-cream p-4 sm:p-6">
+        <div className="mx-auto max-w-6xl">
+          <div className="rounded-xl border border-border bg-surface p-8 text-center">
+            <p className="text-sm text-muted">
+              Loading quotations...
             </p>
           </div>
-
-          <QuotationForm
-            control={control}
-            register={register}
-            errors={errors}
-            fieldArray={fieldArray}
-            handleSubmit={handleSubmit}
-            isEditMode={Boolean(quotation)}
-            isSubmitting={isSaving}
-            onSubmit={handleFormSubmit}
-          />
         </div>
       </div>
     );
   }
 
-  const client =
-    typeof quotation?.client === "object"
-      ? quotation.client
-      : undefined;
+  if (isError) {
+    return (
+      <div className="min-h-full bg-cream p-4 sm:p-6">
+        <div className="mx-auto max-w-6xl">
+          <div className="rounded-xl border border-ember/25 bg-surface p-6">
+            <h2 className="font-serif text-xl font-bold text-ember">
+              Unable to load quotations
+            </h2>
 
-  if (!quotation) {
-    return null;
+            <p className="mt-2 text-sm text-ember">
+              {getErrorMessage(
+                projectsError || quotationsError
+              )}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4 sm:p-6">
-      <div className="mx-auto max-w-5xl">
-        <div className="mb-5 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() =>
-              navigate(
-                `/designer/projects/${quotationProjectId}`
-              )
-            }
-            className="text-sm font-medium text-gray-600 hover:text-gray-900"
-          >
-            ← Back to Project
-          </button>
+    <div className="min-h-full bg-cream p-4 sm:p-6">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="font-serif text-3xl font-bold text-charcoal">
+              Quotations
+            </h1>
 
-          <div className="flex gap-2">
-            {canEdit && (
-              <button
-                type="button"
-                onClick={() => setIsEditing(true)}
-                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-              >
-                Edit
-              </button>
-            )}
+            <p className="mt-1 text-sm text-muted">
+              Create and manage quotations for your
+              accepted projects.
+            </p>
+          </div>
 
-            {canSubmitForApproval && (
-              <button
-                type="button"
-                onClick={handleSubmitForApproval}
-                disabled={
-                  submitQuotationMutation.isPending ||
-                  !designerSignature
-                }
-                className="rounded-lg bg-[#8B5E3C] px-4 py-2 text-sm font-medium text-white hover:bg-[#744b30] disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {submitQuotationMutation.isPending
-                  ? "Submitting..."
-                  : "Submit for Admin Approval"}
-              </button>
-            )}
-
-            {canDownload && (
-              <button
-                type="button"
-                onClick={handleDownload}
-                disabled={downloadMutation.isPending}
-                className="rounded-lg bg-[#8B5E3C] px-4 py-2 text-sm font-medium text-white hover:bg-[#744b30] disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {downloadMutation.isPending
-                  ? "Downloading..."
-                  : "Download Quotation"}
-              </button>
-            )}
+          <div className="text-sm text-muted">
+            {total} project{total !== 1 ? "s" : ""}
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-xl bg-white shadow-sm">
-          <div className="border-b border-gray-200 px-6 py-7 sm:px-10">
-            <div className="flex flex-col justify-between gap-6 sm:flex-row">
-              <div>
-                <h1 className="text-2xl font-bold tracking-wide text-[#8B5E3C]">
-                  DESIGN FLOW INTERIORS
-                </h1>
+        <div className="mb-5">
+          <SearchField
+            value={searchInput}
+            onChange={setSearchInput}
+            placeholder="Search project or client..."
+            ariaLabel="Search quotations"
+          />
+        </div>
 
-                <p className="mt-1 text-sm text-gray-600">
-                  Interior Design & Modular Solutions
-                </p>
+        {total === 0 ? (
+          <div className="rounded-xl border border-border bg-surface p-8 text-center">
+            <h2 className="font-serif text-lg font-bold text-charcoal">
+              No projects found
+            </h2>
 
-                <div className="mt-4 space-y-1 text-xs text-gray-500">
-                  <p>Kerala, India</p>
-                  <p>+91 9967453420</p>
-                  <p>
-                    info@designflowinteriors.com
-                  </p>
-                </div>
-              </div>
-
-              <div className="text-left sm:text-right">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  QUOTATION
-                </h2>
-
-                <div className="mt-3 space-y-1 text-sm text-gray-600">
-                  <p>
-                    <span className="font-medium">
-                      Quotation Date:
-                    </span>{" "}
-                    {formatDate(
-                      quotation.createdAt
-                    )}
-                  </p>
-
-                  <p>
-                    <span className="font-medium">
-                      Status:
-                    </span>{" "}
-                    {getStatusLabel(
-                      quotation.status
-                    )}
-                  </p>
-                </div>
-              </div>
-            </div>
+            <p className="mt-1 text-sm text-muted">
+              {search
+                ? "No projects match your search."
+                : "Accepted projects will appear here when they are ready for a quotation."}
+            </p>
           </div>
+        ) : (
+          <div className="space-y-8">
+            {awaitingQuotation.length > 0 && (
+              <section>
+                <div className="mb-3 flex items-end justify-between gap-3">
+                  <div>
+                    <h2 className="font-serif text-xl font-bold text-charcoal">
+                      Awaiting Quotation
+                    </h2>
 
-          <div className="grid gap-8 border-b border-gray-200 px-6 py-7 sm:grid-cols-2 sm:px-10">
-            <div>
-              <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                To
-              </h3>
+                    <p className="mt-1 text-sm text-muted">
+                      Accepted projects that still need
+                      a quotation.
+                    </p>
+                  </div>
 
-              <div className="space-y-1 text-sm text-gray-700">
-                <p className="font-semibold text-gray-900">
-                  {client?.fullName || "—"}
-                </p>
+                  <span className="rounded-full bg-amber/10 px-3 py-1 text-xs font-semibold text-amber">
+                    {awaitingQuotation.length}
+                  </span>
+                </div>
 
-                <p>{client?.phone || "—"}</p>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {awaitingQuotation.map((item) => {
+                    const projectId =
+                      item.project._id;
 
-                <p>{client?.email || "—"}</p>
-
-                <p>{client?.address || "—"}</p>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                Project
-              </h3>
-
-              <div className="space-y-2 text-sm text-gray-700">
-                <p>
-                  <span className="font-medium">
-                    Project Name:
-                  </span>{" "}
-                  {typeof projectData?.sourceRequest ===
-                  "object"
-                    ? projectData.sourceRequest.projectName ||
-                      "—"
-                    : "—"}
-                </p>
-
-                <p>
-                  <span className="font-medium">
-                    Required By:
-                  </span>{" "}
-                  {typeof projectData?.sourceRequest ===
-                  "object"
-                    ? formatDate(
-                        projectData.sourceRequest.needBy
-                      )
-                    : "—"}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="px-6 py-7 sm:px-10">
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-150 border-collapse text-sm">
-                <thead>
-                  <tr className="border-b border-gray-300 text-left">
-                    <th className="px-3 py-3 font-semibold text-gray-700">
-                      #
-                    </th>
-
-                    <th className="px-3 py-3 font-semibold text-gray-700">
-                      Description
-                    </th>
-
-                    <th className="px-3 py-3 text-center font-semibold text-gray-700">
-                      Qty
-                    </th>
-
-                    <th className="px-3 py-3 text-right font-semibold text-gray-700">
-                      Rate
-                    </th>
-
-                    <th className="px-3 py-3 text-right font-semibold text-gray-700">
-                      Amount
-                    </th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {quotation.items.map(
-                    (item, index) => (
-                      <tr
-                        key={`${item.description}-${index}`}
-                        className="border-b border-gray-100"
+                    return (
+                      <Link
+                        key={projectId}
+                        to={`/designer/projects/${projectId}/quotation`}
+                        state={{ from: quotationOrigin }}
+                        className="group overflow-hidden rounded-xl border border-border bg-surface transition hover:border-amber hover:shadow-sm"
                       >
-                        <td className="px-3 py-4 text-gray-500">
-                          {index + 1}
-                        </td>
+                        <SafeImage
+                          src={item.projectImage}
+                          alt={item.projectName}
+                          className="h-40 w-full object-cover"
+                        />
 
-                        <td className="px-3 py-4 text-gray-800">
-                          {item.description}
-                        </td>
+                        <div className="p-4">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <h3 className="truncate font-serif text-lg font-bold text-charcoal">
+                                {item.projectName}
+                              </h3>
 
-                        <td className="px-3 py-4 text-center text-gray-700">
-                          {item.quantity}
-                        </td>
+                              <p className="mt-1 truncate text-xs text-muted">
+                                {item.clientName}
+                              </p>
+                            </div>
 
-                        <td className="px-3 py-4 text-right text-gray-700">
-                          {formatCurrency(
-                            item.unitPrice
-                          )}
-                        </td>
+                            <span className="shrink-0 rounded-full bg-amber/10 px-2.5 py-1 text-[11px] font-medium text-amber">
+                              Needs quote
+                            </span>
+                          </div>
 
-                        <td className="px-3 py-4 text-right font-medium text-gray-900">
-                          {formatCurrency(
-                            item.total
-                          )}
-                        </td>
-                      </tr>
+                          <div className="mt-3 grid grid-cols-2 gap-3 border-t border-border/70 pt-3 text-xs">
+                            <div>
+                              <p className="text-muted">
+                                Category
+                              </p>
+
+                              <p className="mt-0.5 truncate font-medium text-charcoal">
+                                {item.category ||
+                                  "Not specified"}
+                              </p>
+                            </div>
+
+                            <div>
+                              <p className="text-muted">
+                                Required by
+                              </p>
+
+                              <p className="mt-0.5 truncate font-medium text-charcoal">
+                                {formatDate(
+                                  item.needBy
+                                )}
+                              </p>
+                            </div>
+                          </div>
+
+                          <p className="mt-3 text-xs font-medium text-clay group-hover:underline">
+                            Create quotation →
+                          </p>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {quotationItems.length > 0 && (
+              <section>
+                <div className="mb-3 flex items-end justify-between gap-3">
+                  <div>
+                    <h2 className="font-serif text-xl font-bold text-charcoal">
+                      Quotation History
+                    </h2>
+
+                    <p className="mt-1 text-sm text-muted">
+                      Existing quotations and their
+                      current status.
+                    </p>
+                  </div>
+
+                  <span className="rounded-full bg-panel px-3 py-1 text-xs font-semibold text-muted">
+                    {quotationItems.length}
+                  </span>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {quotationItems.map(
+                    ({
+                      quotation,
+                      projectId,
+                      projectName,
+                      projectImage,
+                      clientName,
+                    }) => (
+                      <QuotationCard
+                        key={quotation._id}
+                        quotation={quotation}
+                        projectId={projectId}
+                        projectName={projectName}
+                        projectImage={projectImage}
+                        clientName={clientName}
+                        origin={quotationOrigin}
+                      />
                     )
                   )}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="mt-8 flex justify-end">
-              <div className="w-full max-w-sm">
-                <QuotationSummery
-                  subtotal={quotation.subtotal}
-                  discount={quotation.discount}
-                  tax={quotation.tax}
-                  total={quotation.total}
-                />
-              </div>
-            </div>
-          </div>
-
-          {quotation.notes && (
-            <div className="border-t border-gray-200 px-6 py-7 sm:px-10">
-              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                Notes
-              </h3>
-
-              <p className="whitespace-pre-wrap text-sm leading-6 text-gray-700">
-                {quotation.notes}
-              </p>
-            </div>
-          )}
-
-          <div className="border-t border-gray-200 px-6 py-7 sm:px-10">
-            <h3 className="mb-3 text-sm font-semibold text-gray-900">
-              Payment Terms
-            </h3>
-
-            <ul className="list-disc space-y-1 pl-5 text-sm leading-6 text-gray-600">
-              <li>
-                50% advance at project confirmation.
-              </li>
-
-              <li>
-                30% during production / dispatch.
-              </li>
-
-              <li>
-                15% after installation.
-              </li>
-
-              <li>
-                5% after project completion.
-              </li>
-            </ul>
-          </div>
-
-          <div className="border-t border-gray-200 px-6 py-7 sm:px-10">
-            <h3 className="mb-3 text-sm font-semibold text-gray-900">
-              Delivery
-            </h3>
-
-            <p className="text-sm leading-6 text-gray-600">
-              Delivery and installation timelines will
-              be coordinated based on project
-              requirements, material availability,
-              production schedules, and site readiness.
-            </p>
-          </div>
-
-          <div className="border-t border-gray-200 px-6 py-7 sm:px-10">
-            <h3 className="mb-3 text-sm font-semibold text-gray-900">
-              Terms & Conditions
-            </h3>
-
-            <ul className="list-disc space-y-1 pl-5 text-sm leading-6 text-gray-600">
-              <li>
-                Final measurements will be confirmed
-                before production.
-              </li>
-
-              <li>
-                Any changes requested after approval
-                may affect the quotation amount and
-                timeline.
-              </li>
-
-              <li>
-                Production will begin after the
-                required advance payment and final
-                confirmation.
-              </li>
-
-              <li>
-                Site readiness and access for
-                installation are the client's
-                responsibility.
-              </li>
-            </ul>
-          </div>
-
-          <div className="border-t border-gray-200 px-6 py-7 sm:px-10">
-            <h3 className="mb-3 text-sm font-semibold text-gray-900">
-              Material / Hardware Specifications
-            </h3>
-
-            <p className="text-sm leading-6 text-gray-600">
-              Materials, finishes, hardware, colours,
-              and specifications will be based on the
-              selections agreed upon during the project
-              process.
-            </p>
-          </div>
-
-          {/* Designer Signature */}
-          {canSubmitForApproval && (
-            <div className="border-t border-gray-200 px-6 py-7 sm:px-10">
-              <div className="max-w-xl">
-                <h3 className="mb-2 text-sm font-semibold text-gray-900">
-                  Designer Signature
-                </h3>
-
-                <p className="mb-4 text-xs leading-5 text-gray-500">
-                  Please sign below before submitting
-                  this quotation for admin approval.
-                </p>
-
-                <SignaturePad
-                  onChange={setDesignerSignature}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Saved Designer Signature */}
-          {!canSubmitForApproval &&
-            quotation.designerSignature && (
-              <div className="border-t border-gray-200 px-6 py-7 sm:px-10">
-                <div className="max-w-xl">
-                  <h3 className="mb-3 text-sm font-semibold text-gray-900">
-                    Designer Signature
-                  </h3>
-
-                  <img
-                    src={quotation.designerSignature}
-                    alt="Designer signature"
-                    className="h-28 max-w-sm object-contain object-left"
-                  />
-
-                  <div className="mt-2 border-t border-gray-300 pt-2">
-                    <p className="text-sm text-gray-600">
-                      Designer
-                    </p>
-
-                    {quotation.designerSignedAt && (
-                      <p className="mt-1 text-xs text-gray-500">
-                        Signed on{" "}
-                        {formatDate(
-                          quotation.designerSignedAt
-                        )}
-                      </p>
-                    )}
-                  </div>
                 </div>
-              </div>
+              </section>
             )}
-
-          <div className="border-t border-gray-200 px-6 py-8 sm:px-10">
-            <div className="max-w-xs">
-              <p className="text-sm font-semibold text-gray-900">
-                DESIGN FLOW INTERIORS
-              </p>
-
-              <div className="mt-12 border-t border-gray-300 pt-2">
-                <p className="text-sm text-gray-600">
-                  Authorized Signatory
-                </p>
-              </div>
-            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
+  );
+};
+
+interface QuotationCardProps {
+  quotation: IQuotation;
+  projectId: string;
+  projectName: string;
+  projectImage?: string;
+  clientName: string;
+  origin: string;
+}
+
+const QuotationCard = ({
+  quotation,
+  projectId,
+  projectName,
+  projectImage,
+  clientName,
+  origin,
+}: QuotationCardProps) => {
+  const rejectionReason =
+    getQuotationRejectionReason(quotation);
+
+  const actionLabel = canEditQuotation(quotation)
+    ? "Continue quotation"
+    : "View quotation";
+
+  return (
+    <Link
+      to={`/designer/projects/${projectId}/quotation`}
+      state={{ from: origin }}
+      className="group overflow-hidden rounded-xl border border-border bg-surface transition hover:border-amber hover:shadow-sm"
+    >
+      <SafeImage
+        src={projectImage}
+        alt={projectName}
+        className="h-40 w-full object-cover"
+      />
+
+      <div className="p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h3 className="truncate font-serif text-lg font-bold text-charcoal">
+              {projectName}
+            </h3>
+
+            <p className="mt-1 truncate text-xs text-muted">
+              {clientName}
+            </p>
+          </div>
+
+          <span
+            className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium ${
+              quotationStatusStyles[
+                quotation.status
+              ]
+            }`}
+          >
+            {quotationStatusLabels[quotation.status]}
+          </span>
+        </div>
+
+        {rejectionReason && (
+          <p className="mt-3 line-clamp-2 rounded-lg bg-ember/5 px-3 py-2 text-xs leading-5 text-ember">
+            {rejectionReason}
+          </p>
+        )}
+
+        <div className="mt-3 flex items-end justify-between gap-3 border-t border-border/70 pt-3">
+          <div>
+            <p className="text-xs text-muted">
+              Total
+            </p>
+
+            <p className="mt-0.5 text-sm font-semibold text-charcoal">
+              {formatCurrency(quotation.total)}
+            </p>
+          </div>
+
+          <div className="text-right">
+            <p className="text-xs text-muted">
+              Updated
+            </p>
+
+            <p className="mt-0.5 text-xs font-medium text-charcoal">
+              {formatDate(quotation.updatedAt)}
+            </p>
+          </div>
+        </div>
+
+        <p className="mt-3 text-xs font-medium text-clay group-hover:underline">
+          {actionLabel} →
+        </p>
+      </div>
+    </Link>
   );
 };
 

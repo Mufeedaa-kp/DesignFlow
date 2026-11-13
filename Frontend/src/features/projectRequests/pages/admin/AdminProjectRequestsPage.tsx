@@ -13,6 +13,8 @@ import type {
   IProjectRequest,
 } from "../../types/projectRequest.types";
 
+import SearchField from "../../../../shared/components/ui/SearchField";
+
 
 
 const TABS = [
@@ -246,14 +248,12 @@ const AdminProjectRequestsPage = () => {
 
 
       <div className="mb-6">
-        <input
-          type="text"
+        <SearchField
           value={searchQuery}
-          onChange={(e) =>
-            setSearchQuery(e.target.value)
-          }
+          onChange={setSearchQuery}
           placeholder="Search by project, client, category or design..."
-          className="w-full rounded-lg border border-border bg-white px-4 py-2.5 text-sm text-charcoal outline-none transition focus:border-amber sm:max-w-md"
+          ariaLabel="Search project requests"
+          className="sm:max-w-md"
         />
       </div>
 
