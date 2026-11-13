@@ -17,23 +17,25 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            Backend/package-lock.json
+            Frontend/package-lock.json
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 12.9.1
+      - name: Install Backend dependencies
+        run: npm ci --prefix Backend
 
-      - name: Install dependencies
-        run: pnpm install
+      - name: Install Frontend dependencies
+        run: npm ci --prefix Frontend
 
       - name: Build Backend
-        run: pnpm --dir Backend build
+        run: npm run build --prefix Backend
 
       - name: Build Frontend
-        run: pnpm --dir Frontend build
+        run: npm run build --prefix Frontend
