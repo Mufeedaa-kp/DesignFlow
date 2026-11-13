@@ -63,6 +63,14 @@ api.interceptors.response.use(
       error.response?.status === 401 &&
       !originalRequest?._retry
     ) {
+
+      
+      // Logged-out visitors: don't refresh or redirect
+      if (!localStorage.getItem("designflow_token")) {
+        return Promise.reject(error);
+      }
+
+   
       originalRequest._retry = true;
 
       if (isRefreshing) {
