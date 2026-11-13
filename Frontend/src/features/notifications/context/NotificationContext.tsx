@@ -124,6 +124,7 @@ export const NotificationProvider = ({
       abortControllerRef.current = controller;
 
       try {
+
         if (isAccessTokenExpired(token)) {
           try {
             token = await refreshAccessToken(
@@ -137,6 +138,7 @@ export const NotificationProvider = ({
             }
 
             return;
+
           }
         }
 
