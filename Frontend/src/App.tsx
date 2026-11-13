@@ -35,7 +35,7 @@ import ResetPassword from "./features/auth/pages/ResetPassword";
 
 import AdminLayout from "./layouts/AdminLayout";
 import DesignerLayout from "./layouts/DesignerLayout";
-import ClientLayout from "./layouts/ClientLayout";
+
 
 import NotificationsPage from "./features/notifications/pages/NotificationsPage";
 
@@ -78,7 +78,7 @@ import DesignerMoodBoardDetailPage from "./features/moodboards/pages/DesignerMoo
 
 //client
 
-import ClientDashboard from "./features/dashboard/pages/clientDashboard";
+
 
 import MyProjectRequestsPage from "./features/projectRequests/pages/client/MyProjectRequestsPage";
 import ClientProjectRequestDetailsPage from "./features/projectRequests/pages/client/ClientProjectRequestDetailsPage";
@@ -193,9 +193,17 @@ function App() {
         />
 
         <Route
-  path="/notifications"
-  element={<NotificationsPage />}
-/>
+          path="/client/notifications"
+          element={
+            <ProtectedRoute allowedRoles={["client"]}>
+              <>
+                <PublicNavBar />
+                <NotificationsPage />
+                <PublicFooter />
+              </>
+            </ProtectedRoute>
+          }
+        />
 
         {/* admin */}
 
@@ -278,6 +286,11 @@ function App() {
             path="catalog/:categoryId"
             element={<CategoryCatalogItemsPage />}
           />
+
+          <Route
+            path="notifications"
+            element={<NotificationsPage />}
+          />
         </Route>
 
         {/* designer */}
@@ -351,73 +364,126 @@ function App() {
             path="clients/:id"
             element={<DesignerClientDetail />}
           />
+
+          <Route
+            path="notifications"
+            element={<NotificationsPage />}
+          />
         </Route>
 
         {/* client */}
 
-        <Route
-          path="/client"
-          element={
-            <ProtectedRoute
-              allowedRoles={["client"]}
-            >
-              <ClientLayout />
-            </ProtectedRoute>
-          }
-        >
+        <Route path="/client">
           <Route
             index
             element={
               <Navigate
-                to="dashboard"
+                to="/"
                 replace
               />
             }
           />
-
           <Route
             path="dashboard"
-            element={<ClientDashboard />}
-          />
-
-          {/* Project Requests */}
-
-          <Route
-            path="requests"
-            element={<MyProjectRequestsPage />}
-          />
-
-          <Route
-            path="requests/:id"
-            element={<ClientProjectRequestDetailsPage />}
-          />
-
-          <Route
-            path="requests/new"
-            element={<CreateProjectRequestPage />}
-          />
-
-
-          <Route
-            path="moodboards/:projectId"
-            element={<ClientMoodBoardDetailPage />}
-          />
-
-          <Route
-            path="projects"
-            element={<ClientProjectsPage />}
-          />
-
-          <Route
-            path="projects/:id"
-            element={<ClientProjectDetail />}
-          />
-
-          <Route
-            path="profile"
-            element={<ClientProfile />}
+            element={
+              <Navigate
+                to="/"
+                replace
+              />
+            }
           />
         </Route>
+
+        <Route
+          path="/client/requests"
+          element={
+            <ProtectedRoute allowedRoles={["client"]}>
+              <>
+                <PublicNavBar />
+                <MyProjectRequestsPage />
+                <PublicFooter />
+              </>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/client/requests/:id"
+          element={
+            <ProtectedRoute allowedRoles={["client"]}>
+              <>
+                <PublicNavBar />
+                <ClientProjectRequestDetailsPage />
+                <PublicFooter />
+              </>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/client/requests/new"
+          element={
+            <ProtectedRoute allowedRoles={["client"]}>
+              <>
+                <PublicNavBar />
+                <CreateProjectRequestPage />
+                <PublicFooter />
+              </>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/client/moodboards/:projectId"
+          element={
+            <ProtectedRoute allowedRoles={["client"]}>
+              <>
+                <PublicNavBar />
+                <ClientMoodBoardDetailPage />
+                <PublicFooter />
+              </>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/client/projects"
+          element={
+            <ProtectedRoute allowedRoles={["client"]}>
+              <>
+                <PublicNavBar />
+                <ClientProjectsPage />
+                <PublicFooter />
+              </>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/client/projects/:id"
+          element={
+            <ProtectedRoute allowedRoles={["client"]}>
+              <>
+                <PublicNavBar />
+                <ClientProjectDetail />
+                <PublicFooter />
+              </>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/client/profile"
+          element={
+            <ProtectedRoute allowedRoles={["client"]}>
+              <>
+                <PublicNavBar />
+                <ClientProfile />
+                <PublicFooter />
+              </>
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/client/projects/:projectId/quotation"

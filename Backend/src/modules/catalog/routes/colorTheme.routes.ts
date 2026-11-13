@@ -1,3 +1,4 @@
+
 import { Router } from "express";
 
 import {
@@ -10,7 +11,6 @@ import {
 
 import { protect } from "../../../middlewares/auth.middleware";
 import { authorize } from "../../../middlewares/role.middleware";
-import { upload } from "../../../middlewares/upload.middleware";
 import { validate } from "../../../middlewares/validate.middleware";
 
 import {
@@ -24,7 +24,6 @@ router.post(
   "/",
   protect,
   authorize("admin"),
-  upload.single("image"),
   validate(createColorThemeSchema),
   createColorTheme
 );
@@ -37,7 +36,6 @@ router.patch(
   "/:id",
   protect,
   authorize("admin"),
-  upload.single("image"),
   validate(updateColorThemeSchema),
   updateColorTheme
 );

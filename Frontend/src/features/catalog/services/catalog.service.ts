@@ -7,6 +7,7 @@ import type {
   IMaterial,
   IColorTheme,
 } from "../types/catalog.types";
+import type { ColorThemeFormValues } from "../schema/colorTheme.schema";
 
 // Materials
 
@@ -77,7 +78,7 @@ export const getColorThemes = async (
 };
 
 export const createColorTheme = async (
-  data: FormData
+  data: ColorThemeFormValues
 ): Promise<IColorTheme> => {
   const response = await api.post(
     "/catalog/color-themes",
@@ -89,7 +90,7 @@ export const createColorTheme = async (
 
 export const updateColorTheme = async (
   id: string,
-  data: FormData
+  data: ColorThemeFormValues
 ): Promise<IColorTheme> => {
   const response = await api.patch(
     `/catalog/color-themes/${id}`,

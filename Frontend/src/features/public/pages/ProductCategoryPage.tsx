@@ -34,18 +34,18 @@ const ProductCategoryPage = () => {
       <HeroBanner
   label="Products"
   quote={category.title}
-  image={category.image}
+  image={category.heroImage || category.image}
 />
 
       {/* Intro */}
 
-      <section className="py-20">
-        <div className="max-w-3xl mx-auto px-6 sm:px-10 text-center">
-          <h2 className="font-serif text-3xl text-charcoal mb-5">
+      <section className="section-fullscreen">
+        <div className="max-w-3xl mx-auto px-6 sm:px-10 text-center section-fullscreen-content">
+          <h2 className="reveal-on-scroll font-serif text-3xl text-charcoal mb-5">
             {category.title}
           </h2>
 
-          <p className="text-base leading-relaxed text-charcoal/80">
+          <p className="reveal-on-scroll text-base leading-relaxed text-charcoal/80" style={{ "--reveal-delay": "0.12s" } as React.CSSProperties}>
             {category.intro}
           </p>
         </div>
@@ -54,21 +54,22 @@ const ProductCategoryPage = () => {
 
       {/* Works */}
 
-      <section className="pb-24">
-        <div className="max-w-6xl mx-auto px-6 sm:px-10">
+      <section className="section-fullscreen">
+        <div className="max-w-6xl mx-auto px-6 sm:px-10 section-fullscreen-content">
 
-          <span className="block text-xs uppercase tracking-[0.28em] text-clay mb-8 text-center">
+          <span className="reveal-on-scroll block text-xs uppercase tracking-[0.28em] text-clay mb-8 text-center">
             Our Work
           </span>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {category.works.map((work) => (
+            {category.works.map((work, idx) => (
               <button
                 key={work.id}
                 type="button"
                 onClick={() => setActiveWorkId(work.id)}
                 aria-label={`View ${work.title}`}
-                className="group aspect-square overflow-hidden bg-linear-to-br from-panel to-surface border border-border hover:opacity-90 transition-opacity"
+                className="reveal-on-scroll group aspect-square overflow-hidden bg-linear-to-br from-panel to-surface border border-border hover:opacity-90 transition-opacity"
+                style={{ "--reveal-delay": `${0.12 + idx * 0.06}s` } as React.CSSProperties}
               >
                 {work.image ? (
                   <img

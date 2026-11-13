@@ -15,11 +15,11 @@ export interface GoogleAuthFailure {
   };
 }
 
-const roleRedirects: Record<Role, string> = {
-  admin: "/admin/dashboard",
-  designer: "/designer/dashboard",
-  client: "/client/dashboard",
-};
+  const roleRedirects: Record<Role, string> = {
+    admin: "/admin/dashboard",
+    designer: "/designer/dashboard",
+    client: "/",
+  };
 
 const roleLabels: Record<Role, string> = {
   admin: "an admin",

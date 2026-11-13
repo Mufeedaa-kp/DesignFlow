@@ -86,6 +86,38 @@ const DesignImageCard = ({
   </div>
 );
 
+
+const ColorThemeOption = ({
+  name,
+  colors,
+}: {
+  name: string;
+  colors: string[];
+}) => (
+  <div className="flex items-center gap-3 rounded-lg border border-border bg-surface p-3">
+    <div className="grid h-14 w-14 shrink-0 grid-cols-2 overflow-hidden rounded-md">
+      {colors.map((color, index) => (
+        <div
+          key={`${color}-${index}`}
+          style={{ backgroundColor: color }}
+          title={color}
+        />
+      ))}
+    </div>
+
+    <div className="min-w-0">
+      <p className="truncate text-sm font-medium text-charcoal">
+        {name}
+      </p>
+
+      <p className="text-xs text-muted">
+        Selected color theme
+      </p>
+    </div>
+  </div>
+);
+
+
 const OptionImage = ({
   image,
   name,
@@ -708,23 +740,34 @@ const DesignerProjectDetail = () => {
               Materials
             </p>
 
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {sourceRequest.materials.map(
-                (material, index) =>
-                  typeof material === "object" ? (
-                    <OptionImage
-                      key={material._id ?? index}
-                      name={material.name}
-                      image={material.images?.[0]}
-                    />
-                  ) : (
-                    <OptionImage
-                      key={`material-${index}`}
-                      name="Material unavailable"
-                    />
-                  )
-              )}
-            </div>
+          
+
+{sourceRequest?.colorThemes &&
+  sourceRequest.colorThemes.length > 0 && (
+    <div>
+      <p className="text-xs text-muted mb-3">Color Themes</p>
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {sourceRequest.colorThemes.map((theme, index) =>
+          typeof theme === "object" && theme !== null ? (
+            <ColorThemeOption
+              key={theme._id ?? index}
+              name={theme.name}
+              colors={theme.colors ?? []}
+            />
+          ) : (
+            <ColorThemeOption
+              key={`theme-${index}`}
+              name="Color theme unavailable"
+              colors={[]}
+            />
+          )
+        )}
+      </div>
+    </div>
+  )}
+
+
           </div>
         )}
 
@@ -739,11 +782,11 @@ const DesignerProjectDetail = () => {
               {sourceRequest.colorThemes.map(
                 (theme, index) =>
                   typeof theme === "object" ? (
-                    <OptionImage
-                      key={theme._id ?? index}
-                      name={theme.name}
-                      image={theme.image}
-                    />
+                    <ColorThemeOption
+  name={theme.name}
+  colors={theme.colors ?? []}
+/>
+                    
                   ) : (
                     <OptionImage
                       key={`theme-${index}`}

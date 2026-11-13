@@ -66,148 +66,89 @@ const ProjectRequestOptionsPage = ({
     colorThemesData?.pagination?.totalPages ?? 1;
 
   return (
-    <>
-      {/* Header */}
-      <div className="mb-5">
-        <h1 className="text-xl font-semibold text-gray-800 sm:text-2xl">
-          Materials & Color Themes
-        </h1>
-
-        <p className="mt-1 text-xs leading-5 text-gray-500 sm:text-sm">
-          Choose the materials and color themes you prefer.
+    <div className="border border-border bg-white p-6 sm:p-8">
+      {/* Materials */}
+      <section>
+        <h2 className="font-serif text-2xl text-charcoal">Materials</h2>
+        <p className="mb-5 mt-1 text-sm text-muted">
+          Select one or more materials.
         </p>
-      </div>
 
-      {/* Progress */}
-      <div className="mb-5 flex flex-wrap items-center gap-2 text-xs sm:text-sm">
-        <span className="text-gray-400">1. Category</span>
-
-        <span className="text-gray-300">→</span>
-
-        <span className="text-gray-400">2. Design</span>
-
-        <span className="text-gray-300">→</span>
-
-        <span className="font-medium text-[#8B5E3C]">
-          3. Options
-        </span>
-
-        <span className="text-gray-300">→</span>
-
-        <span className="text-gray-400">4. Requirements</span>
-
-        <span className="text-gray-300">→</span>
-
-        <span className="text-gray-400">5. Review</span>
-      </div>
-
-      {/* Main Content */}
-      <div className="rounded-xl bg-white p-4 shadow-sm sm:p-5">
-        {/* Materials */}
-        <section>
-          <div className="mb-4">
-            <h2 className="text-base font-semibold text-gray-800 sm:text-lg">
-              Materials
-            </h2>
-
-            <p className="mt-1 text-xs text-gray-500 sm:text-sm">
-              Select one or more materials.
-            </p>
+        {materialsLoading && (
+          <div className="bg-panel p-5 text-center text-sm text-muted">
+            Loading materials...
           </div>
+        )}
 
-          {materialsLoading && (
-            <div className="rounded-lg bg-[#F8F6F2] p-5 text-center">
-              <p className="text-xs text-gray-500 sm:text-sm">
-                Loading materials...
-              </p>
-            </div>
-          )}
-
-          {materialsError && (
-            <div className="rounded-lg bg-red-50 p-5 text-center">
-              <p className="text-xs text-red-500 sm:text-sm">
-                Failed to load materials.
-              </p>
-            </div>
-          )}
-
-          {!materialsLoading && !materialsError && (
-            <MaterialSelector
-              materials={materials}
-              selectedMaterialIds={selectedMaterialIds}
-              onSelect={onSelectMaterial}
-              page={materialsPage}
-              totalPages={materialsTotalPages}
-              onPageChange={setMaterialsPage}
-            />
-          )}
-        </section>
-
-        {/* Divider */}
-        <div className="my-6 border-t border-[#EDE7E1]" />
-
-        {/* Color Themes */}
-        <section>
-          <div className="mb-4">
-            <h2 className="text-base font-semibold text-gray-800 sm:text-lg">
-              Color Themes
-            </h2>
-
-            <p className="mt-1 text-xs text-gray-500 sm:text-sm">
-              Select one or more color themes.
-            </p>
+        {materialsError && (
+          <div className="bg-red-50 p-5 text-center text-sm text-red-500">
+            Failed to load materials.
           </div>
+        )}
 
-          {colorThemesLoading && (
-            <div className="rounded-lg bg-[#F8F6F2] p-5 text-center">
-              <p className="text-xs text-gray-500 sm:text-sm">
-                Loading color themes...
-              </p>
-            </div>
-          )}
+        {!materialsLoading && !materialsError && (
+          <MaterialSelector
+            materials={materials}
+            selectedMaterialIds={selectedMaterialIds}
+            onSelect={onSelectMaterial}
+            page={materialsPage}
+            totalPages={materialsTotalPages}
+            onPageChange={setMaterialsPage}
+          />
+        )}
+      </section>
 
-          {colorThemesError && (
-            <div className="rounded-lg bg-red-50 p-5 text-center">
-              <p className="text-xs text-red-500 sm:text-sm">
-                Failed to load color themes.
-              </p>
-            </div>
-          )}
+      <div className="my-8 border-t border-border" />
 
-          {!colorThemesLoading && !colorThemesError && (
-            <ColorThemeSelector
-              colorThemes={colorThemes}
-              selectedColorThemeIds={selectedColorThemeIds}
-              onSelect={onSelectColorTheme}
-              page={colorThemesPage}
-              totalPages={colorThemesTotalPages}
-              onPageChange={setColorThemesPage}
-            />
-          )}
-        </section>
+      {/* Color Themes */}
+      <section>
+        <h2 className="font-serif text-2xl text-charcoal">Color themes</h2>
+        <p className="mb-5 mt-1 text-sm text-muted">
+          Select one or more color themes.
+        </p>
 
-        {/* Navigation */}
-    
+        {colorThemesLoading && (
+          <div className="bg-panel p-5 text-center text-sm text-muted">
+            Loading color themes...
+          </div>
+        )}
 
-<div className="mt-10 flex items-center justify-between border-t border-gray-100 pt-6">
-  <button
-    type="button"
-    onClick={onBack}
-    className="rounded-lg border border-gray-200 px-6 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
-  >
-    Back
-  </button>
+        {colorThemesError && (
+          <div className="bg-red-50 p-5 text-center text-sm text-red-500">
+            Failed to load color themes.
+          </div>
+        )}
 
-  <button
-    type="button"
-    onClick={onContinue}
-    className="rounded-lg bg-[#8B5E3C] px-6 py-3 text-sm font-medium text-white transition hover:bg-[#70482F]"
-  >
-    Continue
-  </button>
-</div>
+        {!colorThemesLoading && !colorThemesError && (
+          <ColorThemeSelector
+            colorThemes={colorThemes}
+            selectedColorThemeIds={selectedColorThemeIds}
+            onSelect={onSelectColorTheme}
+            page={colorThemesPage}
+            totalPages={colorThemesTotalPages}
+            onPageChange={setColorThemesPage}
+          />
+        )}
+      </section>
+
+      {/* Navigation */}
+      <div className="mt-8 flex items-center justify-between border-t border-border pt-6">
+        <button
+          type="button"
+          onClick={onBack}
+          className="border border-border px-8 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-charcoal transition hover:bg-panel"
+        >
+          Back
+        </button>
+        <button
+          type="button"
+          onClick={onContinue}
+          className="border border-[var(--color-brown)] bg-[var(--color-brown)] px-8 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-cream transition hover:brightness-110"
+        >
+          Continue
+        </button>
       </div>
-    </>
+    </div>
   );
 };
 

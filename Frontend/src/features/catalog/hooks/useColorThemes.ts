@@ -10,6 +10,7 @@ import {
   updateColorTheme,
   deleteColorTheme,
 } from "../services/catalog.service";
+import type { ColorThemeFormValues } from "../schema/colorTheme.schema";
 
 export const useColorThemes = (
   page = 1,
@@ -52,7 +53,7 @@ export const useUpdateColorTheme = () => {
       data,
     }: {
       id: string;
-      data: FormData;
+      data: ColorThemeFormValues;
     }) => updateColorTheme(id, data),
 
     onSuccess: () => {

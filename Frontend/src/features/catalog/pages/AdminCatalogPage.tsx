@@ -8,6 +8,7 @@ import MaterialForm from "../components/MaterialForm";
 import MaterialCard from "../components/MaterialCard";
 import ColorThemeForm from "../components/ColorThemeForm";
 import ColorThemeCard from "../components/ColorThemeCard";
+import type { ColorThemeFormValues } from "../schema/colorTheme.schema";
 
 import type {
   ICategory,
@@ -229,45 +230,43 @@ const colorThemesTotalPages =
     );
   };
 
-  // Create color theme
+// Create color theme
+const handleCreateColorTheme = (
+  data: ColorThemeFormValues
+) => {
+  createColorThemeMutation.mutate(data, {
+    onSuccess: () => {
+      setShowColorThemeForm(false);
+      setColorThemesPage(1);
+    },
+    onError: (error) => {
+      notifyAdminError(error, "Failed to create color theme");
+    },
+  });
+};
 
-  const handleCreateColorTheme = (
-    data: FormData
-  ) => {
-    createColorThemeMutation.mutate(data, {
+// Update color theme
+const handleUpdateColorTheme = (
+  data: ColorThemeFormValues
+) => {
+  if (!editingColorTheme) return;
+
+  updateColorThemeMutation.mutate(
+    {
+      id: editingColorTheme._id,
+      data,
+    },
+    {
       onSuccess: () => {
         setShowColorThemeForm(false);
-        setColorThemesPage(1);
+        setEditingColorTheme(undefined);
       },
       onError: (error) => {
-        notifyAdminError(error, "Failed to create color theme");
+        notifyAdminError(error, "Failed to update color theme");
       },
-    });
-  };
-
-  // Update color theme
-
-  const handleUpdateColorTheme = (
-    data: FormData
-  ) => {
-    if (!editingColorTheme) return;
-
-    updateColorThemeMutation.mutate(
-      {
-        id: editingColorTheme._id,
-        data,
-      },
-      {
-        onSuccess: () => {
-          setShowColorThemeForm(false);
-          setEditingColorTheme(undefined);
-        },
-        onError: (error) => {
-          notifyAdminError(error, "Failed to update color theme");
-        },
-      }
-    );
-  };
+    }
+  );
+};
 
   
   // Category form

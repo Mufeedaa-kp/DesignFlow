@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { getGoogleClientId } from "../utils/googleClientId";
-import { loadGoogleIdentity } from "../utils/loadGoogleIdentity";
+import {
+  initializeGoogleIdentity,
+  registerGoogleCredentialHandler,
+} from "../utils/googleIdentity";
 
 interface GoogleSignInButtonProps {
   onCredential: (credential: string) => void;
@@ -24,6 +27,10 @@ const GoogleSignInButton = ({
   }, [onCredential]);
 
   useEffect(() => {
+    return registerGoogleCredentialHandler(() => callbackRef.current);
+  }, []);
+
+  useEffect(() => {
     if (!clientId && import.meta.env.DEV) {
       console.warn(
         "VITE_GOOGLE_CLIENT_ID is not configured. Google Sign-In is disabled.",
@@ -45,7 +52,7 @@ const GoogleSignInButton = ({
     setIsReady(false);
     setLoadError("");
 
-    loadGoogleIdentity()
+    initializeGoogleIdentity(clientId)
       .then(() => {
         if (cancelled) {
           return;
@@ -57,16 +64,6 @@ const GoogleSignInButton = ({
           );
           return;
         }
-
-        window.google.accounts.id.initialize({
-          client_id: clientId,
-          auto_select: false,
-          callback: (response) => {
-            if (response.credential) {
-              void callbackRef.current(response.credential);
-            }
-          },
-        });
 
         container.replaceChildren();
         window.google.accounts.id.renderButton(container, {

@@ -23,7 +23,7 @@ export interface IMaterial {
 export interface IColorTheme {
   _id: string;
   name: string;
-  image: string;
+  colors: string[];
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
