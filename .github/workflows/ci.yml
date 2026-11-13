@@ -1,0 +1,39 @@
+
+name: DesignFlow CI
+
+on:
+  push:
+    branches:
+      - main
+      - designglow/updates
+  pull_request:
+    branches:
+      - main
+      - designglow/updates
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12.9.1
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build Backend
+        run: pnpm --dir Backend build
+
+      - name: Build Frontend
+        run: pnpm --dir Frontend build
